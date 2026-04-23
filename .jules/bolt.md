@@ -1,0 +1,3 @@
+## 2024-04-23 - PowerShell Array Concatenation Bottleneck
+**Learning:** PowerShell's `+=` operator on arrays creates a new array and copies all elements every single time it's called. Inside large iteration loops (like active directory user scans or tenant processing where data sets can be huge), this creates an O(N^2) time complexity curve, becoming a massive performance cliff.
+**Action:** Always use direct pipeline assignment `$array = $collection | foreach { ... }` instead of `$array = @(); $collection | foreach { $array += $_ }`. This reduces the complexity to O(N) by letting PowerShell's pipeline internally buffer and construct the result array natively.
