@@ -1,0 +1,3 @@
+## 2024-04-24 - Avoid O(N^2) Array Concatenation Bottlenecks in PowerShell
+**Learning:** PowerShell arrays are immutable. Using the `+=` operator inside a loop reallocates memory and copies the entire array on every iteration. This leads to a severe O(N²) performance degradation when dealing with large datasets (e.g., thousands of objects like entities in an Azure Active Directory tenant or AWS permission lines).
+**Action:** Replace `+=` assignments inside loops with direct pipeline assignment patterns like `$array = $collection | foreach { ... }` or use specialized structures like `[System.Collections.Generic.List[object]]` with the `.Add()` method to maintain O(N) execution time. Always scan PowerShell scripts for `+=` to spot these architectural bottlenecks.
