@@ -1,0 +1,3 @@
+## 2024-05-24 - [PowerShell Array Concatenation Anti-Pattern]
+**Learning:** In PowerShell, using the `+=` operator for array concatenation inside loops creates severe O(N^2) performance bottlenecks because a new array is allocated in memory for each iteration. This is a critical architectural finding in this codebase, especially when processing large datasets like Azure AD objects where loop counts can easily reach thousands or tens of thousands.
+**Action:** Always prefer direct pipeline assignment (`$array = collection | foreach { ... }`) or use `System.Text.StringBuilder` for heavy string manipulation to ensure O(N) performance and drastically reduce execution time when scanning.
