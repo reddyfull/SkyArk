@@ -1,0 +1,3 @@
+## 2024-05-18 - Replacing `+=` with direct pipeline assignments in PowerShell
+**Learning:** Using the `+=` operator for array concatenation inside loops creates severe $O(N^2)$ performance bottlenecks in PowerShell scripts. This is because PowerShell creates a new array in memory and copies all existing elements over every single iteration.
+**Action:** When building collections in loops, particularly in data gathering or reporting scripts like those in SkyArk, always use direct pipeline assignment (e.g., `$array = $collection | foreach { ... }`) to achieve $O(N)$ performance.
