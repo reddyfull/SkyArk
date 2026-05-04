@@ -1,0 +1,3 @@
+## 2024-05-04 - Eliminate O(N^2) array concatenation bottlenecks
+**Learning:** Using the `+=` operator to build arrays within a loop in PowerShell is highly inefficient. Arrays in PowerShell are immutable; each `+=` operation allocates a new array in memory and copies over all the old elements. Over a loop containing many items (e.g. `$entityDict.Values`), this leads to an O(N^2) time complexity and severe performance degradation.
+**Action:** Always favor direct pipeline assignment (`$array = $collection | foreach { ... }`) when accumulating objects from a loop. This leverages the pipeline's internal optimizations to handle collection allocation and reduces time complexity to O(N).
