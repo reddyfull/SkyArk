@@ -1,0 +1,3 @@
+## 2024-06-18 - Avoid O(N^2) Performance Bottleneck in PowerShell Array Concatenation
+**Learning:** During large active directory entity enumerations, appending to an array using the `+=` operator inside a loop allocates a new array each iteration, causing severe O(N^2) performance overhead. In PowerShell, arrays are immutable, so `+=` rebuilds the collection entirely behind the scenes.
+**Action:** Always prefer direct pipeline assignments (e.g., `$array = $collection | foreach { ... }`) to build output collections. This operates in O(N) time and significantly speeds up operations involving potentially thousands of cloud entities, and simplifies code readability by removing redundant dummy arrays and redundant iteration loops.
