@@ -1,0 +1,3 @@
+## 2024-05-24 - String Evaluation in PowerShell `Where-Object`
+**Learning:** Using `Where-Object` on a string (e.g., `$str | Where-Object {$_ -eq ','}`) does not evaluate characters individually; it evaluates the entire string as a single object. This leads to logical errors when attempting to count occurrences of characters or substrings using `.Count` alongside the pipeline overhead.
+**Action:** Use native string methods like `.Split(',').Count - 1` or `[regex]::Matches($str, 'pattern').Count` to correctly and efficiently count character or substring occurrences in strings, entirely avoiding the pipeline overhead.
