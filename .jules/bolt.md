@@ -1,0 +1,3 @@
+## 2024-05-18 - [PowerShell Pipeline Optimization & Logical Fixes]
+**Learning:** Found significant pipeline overhead using `Measure-Object` for simple array counting in PowerShell scripts. Also discovered a logic flaw where `Where-Object` was used on strings assuming it iterated over characters, which resulted in incorrect policy counting for users in groups.
+**Action:** Replaced `Measure-Object` pipelines with the `.Count` property and fixed the logical string character counting issue using `.Split().Count - 1` and `[regex]::Matches().Count` respectively. This eliminates slow O(N) operations in tight loops and restores the accuracy of the stealth analysis report.
