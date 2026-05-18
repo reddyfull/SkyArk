@@ -1,0 +1,3 @@
+## 2024-06-19 - [Fixing logical bugs and performance overhead of string operations with Measure-Object]
+**Learning:** Using `Where-Object` on a string in PowerShell evaluating the whole string as a single object (e.g., `$string | Where-Object {$_ -eq ','}`) evaluates the entire string as a single object, leading to logic bugs. Also using `Measure-Object` for simple array length checks or pipelined loops introduces massive performance overhead.
+**Action:** Use string methods like `.Split(',').Count - 1` or `[regex]::Matches($string, 'pattern').Count` to correctly count occurrences and resolve logic bugs. Direct property access (e.g., `@($array).Count`) rather than piping to `Measure-Object` should be used consistently.
