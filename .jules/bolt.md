@@ -1,0 +1,3 @@
+## 2024-05-24 - [Optimize PowerShell Pipeline Counting]
+**Learning:** Using `Measure-Object` for simple array or dictionary counting operations creates significant pipeline overhead. Furthermore, applying `Where-Object` on arrays containing complex objects or dictionary output without extracting values first can lead to subtle counting bugs.
+**Action:** Avoid pipeline usages like `| Measure-Object`. Directly read the `.Count` property of the list or dictionary items (e.g. `@(var).Count`). For HashTables or dictionaries, use `.Values` to correctly filter values. Use native string operators (`[regex]::Matches()`) instead of pipe filtering (`Where-Object`) to count string occurrences natively.
