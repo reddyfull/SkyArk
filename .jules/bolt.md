@@ -1,0 +1,3 @@
+## 2024-05-14 - [Measure-Object vs .Count Performance and Logic Fix]
+**Learning:** In PowerShell, piping objects to `Measure-Object` is significantly slower than directly accessing the `.Count` property. Furthermore, piping a string to `Where-Object` incorrectly treats the entire string as a single object, leading to logic bugs when counting substring occurrences.
+**Action:** Always prefer direct `.Count` property access over `Measure-Object` for counting arrays or collections. Use string methods like `.Split(',').Count - 1` or `[regex]::Matches()` for counting character or substring occurrences within a string.
