@@ -952,27 +952,29 @@ function Write-Report {
 
     $reportOutputArray = New-Object System.Collections.Generic.List[System.String]
 
-    $allPrivivlgedEntities = $privilegedEntitiesDB | select "Arn" -Unique
-    $numAllPrivivlgedEntities = $($allPrivivlgedEntities | Measure-Object).count
+    # Bolt Optimization: Replaced pipeline Where-Object and Measure-Object with .Values.Where({}) and .Count
+    # This prevents O(N^2) pipeline overhead and fixes Hashtable evaluation bugs where properties were null.
+    $allPrivivlgedEntities = $privilegedEntitiesDB.Values | select "Arn" -Unique
+    $numAllPrivivlgedEntities = @($allPrivivlgedEntities).Count
     Write-host "-> AWStealth discovered $numAllPrivivlgedEntities privileged entities" -BackgroundColor DarkRed
-    $awsAccount = (([string]$allPrivivlgedEntities[0]).Split(":"))[4]
-    $shadowAdmins = $privilegedEntitiesDB | Where-Object {$_.PrivilegeType -like "*shadow*"} 
-    $numShadowAdmins = $($shadowAdmins | Measure-Object).count
+    $awsAccount = (([string]$allPrivivlgedEntities[0].Arn).Split(":"))[4]
+    $shadowAdmins = @($privilegedEntitiesDB.Values.Where({$_.PrivilegeType -match "shadow"}))
+    $numShadowAdmins = $shadowAdmins.Count
     if ($numShadowAdmins -ge 1) {
          Write-host "-> Discovered $numShadowAdmins AWS Shadow Admins" -BackgroundColor DarkRed
     }
-    $privilegedUsers = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "User"}
-    $numPrivilegedUsers = $($privilegedUsers | Measure-Object).count
-    $privilegedGroups = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Group"}
-    $numPrivilegedGroups = $($privilegedGroups | Measure-Object).count
-    $privilegedRoles = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Role"}
-    $numPivilegedRoles = $($privilegedRoles | Measure-Object).count
-    $privilegedUserNoMFA = $privilegedEntitiesDB | Where-Object {$_.MFAenable -eq "NoMFA"} 
-    $numPrivilegedUserNoMFA = $($privilegedUserNoMFA | Measure-Object).count
-    $privilegedUsersNoCondition = $privilegedEntitiesDB | Where-Object {$_.policyCondition -like "*noCon*"} 
-    $numPrivilegedUsersNoCondition = $($privilegedUsersNoCondition | Measure-Object).count
-    $privielgedUsersNotSecured = $privilegedEntitiesDB | Where-Object {($_.policyCondition -like "*noCon*") -and ($_.MFAenable -eq "NoMFA")} 
-    $numPivielgedUsersNotSecured = $($privielgedUsersNotSecured| Measure-Object).count
+    $privilegedUsers = @($privilegedEntitiesDB.Values.Where({$_.EntityType -eq "User"}))
+    $numPrivilegedUsers = $privilegedUsers.Count
+    $privilegedGroups = @($privilegedEntitiesDB.Values.Where({$_.EntityType -eq "Group"}))
+    $numPrivilegedGroups = $privilegedGroups.Count
+    $privilegedRoles = @($privilegedEntitiesDB.Values.Where({$_.EntityType -eq "Role"}))
+    $numPivilegedRoles = $privilegedRoles.Count
+    $privilegedUserNoMFA = @($privilegedEntitiesDB.Values.Where({$_.MFAenable -eq "NoMFA"}))
+    $numPrivilegedUserNoMFA = $privilegedUserNoMFA.Count
+    $privilegedUsersNoCondition = @($privilegedEntitiesDB.Values.Where({$_.policyCondition -match "noCon"}))
+    $numPrivilegedUsersNoCondition = $privilegedUsersNoCondition.Count
+    $privielgedUsersNotSecured = @($privilegedEntitiesDB.Values.Where({($_.policyCondition -match "noCon") -and ($_.MFAenable -eq "NoMFA")}))
+    $numPivielgedUsersNotSecured = $privielgedUsersNotSecured.Count
     $scanTime = Get-Date -Format g
 
     $reportOutputArray.Add("")
@@ -1047,8 +1049,10 @@ function Write-Report {
     $counter = 0
     $usersFromGroups = @()
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
+        # Bolt Optimization: Replaced pipeline Where-Object and Measure-Object for counting strings
+        # using String.Split and Regex.Matches for correctness and performance.
+        $countPolicyNames = $_.PolicyName.Split(',').Count - 1
+        $countPoliciesFromGroups = [regex]::Matches($_.PolicyName, '-Thr').Count
         if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
             $usersFromGroups += $_.EntityName
         }
