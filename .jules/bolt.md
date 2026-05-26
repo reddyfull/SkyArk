@@ -1,0 +1,3 @@
+## 2024-05-23 - Avoid Pipeline Array Counting in Loops
+**Learning:** In PowerShell, using the pipeline (`| Where-Object | Measure-Object`) inside a loop is extremely slow and causes severe O(N^2) bottlenecks on large datasets. Furthermore, piping a string evaluates the entire string as a single object, leading to logic bugs.
+**Action:** When counting substring or character occurrences, or filtering arrays inside a loop, avoid pipelines. Use `([string]$var).Split(',').Count - 1` to count characters, and use array operators like `@($array -match 'pattern').Count` for performant array counting. Always cast to `[string]` before string methods to avoid null-reference exceptions.
