@@ -1,0 +1,3 @@
+## 2024-05-24 - [Avoid Pipeline Counting]
+**Learning:** PowerShell's pipeline (e.g., `| Measure-Object`) creates severe bottlenecks due to instantiation overhead for every piped object. Wrapping in `@()` and using `.Count` is O(1) and vastly faster. Also, pipeline string text filtering is computationally heavy and often incorrect, so native `.Split()` and `[regex]::Matches()` should be used instead. Further, querying a hashtable via the pipeline without using `.Values` or `.Keys` causes dictionary entry processing that breaks `.Where()` logic.
+**Action:** Default to `$array.Count` over `Measure-Object`, and always iterate hashtables using `.Values`/`.Keys`.
