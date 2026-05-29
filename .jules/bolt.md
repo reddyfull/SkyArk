@@ -1,0 +1,3 @@
+## 2024-05-18 - [PowerShell Pipeline Count Performance]
+**Learning:** In PowerShell, using the pipeline with `Measure-Object` for simple counting (e.g., `... | Measure-Object`) adds massive pipeline overhead compared to direct property access like `@(...).Count`. Also, piping strings through pipelines and comparing them (e.g. `$string | Where-Object {$_ -eq ','} | Measure-Object`) has incorrect logic because it processes the entire string as one object rather than individual characters.
+**Action:** Use `.Count` for arrays and variables directly. For counting character or substring occurrences in a string, use methods like `.Split(',').Count - 1` or `[regex]::Matches()`.
