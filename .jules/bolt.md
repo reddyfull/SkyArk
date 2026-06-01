@@ -1,0 +1,3 @@
+## 2026-06-01 - Array filtering operators vs Where-Object
+**Learning:** In PowerShell, using array filtering operators like `-eq` or `-like` directly on an array (e.g., `@(@($array) -eq 'val').Count`) is drastically faster than piping to `Where-Object` and `Measure-Object`. Furthermore, this pattern perfectly preserves the original scalar/array semantics when the variable might be a single string.
+**Action:** When migrating `Where-Object | Measure-Object` on variables that might be scalars or arrays, do not use `.Split()` or string regexes if the original intent was array item filtering. Instead, force the operand into an array and use PowerShell's native array filtering operators.

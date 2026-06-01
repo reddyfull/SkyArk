@@ -1047,8 +1047,10 @@ function Write-Report {
     $counter = 0
     $usersFromGroups = @()
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
+        # Performance optimization: Replace 'Where-Object | Measure-Object' with array -eq/-like operators
+        # PolicyName is a string, so @(@($_.PolicyName) -eq ',').Count perfectly replicates original behavior
+        $countPolicyNames = @(@($_.PolicyName) -eq ',').Count
+        $countPoliciesFromGroups = @(@($_.PolicyName) -like '*-Thr*').Count
         if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
             $usersFromGroups += $_.EntityName
         }
