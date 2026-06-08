@@ -1,0 +1,3 @@
+## 2024-06-08 - [Performance Bottleneck: Pipeline Overhead and Measure-Object]
+**Learning:** In PowerShell, using pipelines (`| Measure-Object` or `| Where-Object`) comes with substantial overhead. Furthermore, string variables are treated as scalars in the pipeline (yielding unexpected results like 0 when filtering for string characters). Wrapping a scalar with `@()` and using a native array filtering operator handles counting robustly and quickly.
+**Action:** Always prefer direct property access (e.g., `@($var).Count`) over `Measure-Object` and use array filtering operators (like `-like` or `-match`) or `.Split` logic instead of passing strings into a pipeline for parsing and counting.
