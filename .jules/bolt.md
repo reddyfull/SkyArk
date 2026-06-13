@@ -1,0 +1,3 @@
+## 2024-05-14 - [Replace Measure-Object Pipeline with intrinsic .Count property]
+**Learning:** Using `Measure-Object` in a PowerShell pipeline introduces massive overhead when executed inside loops, drastically degrading performance. Additionally, piping strings to `Where-Object` array filters behaves inconsistently as PowerShell evaluates strings as a 1-item array.
+**Action:** Replace `($list | Measure-Object).Count` with the `$list.Count` property which evaluates instantly and is safe for $nulls/scalars since PowerShell 3.0. For substring filtering/counting, prefer array coercing and the `-like` operator or the `.Split()` method over `Where-Object` pipes for accuracy and speed.
