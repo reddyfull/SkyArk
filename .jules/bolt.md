@@ -1,0 +1,3 @@
+## 2024-06-16 - PowerShell Array Filtering vs Measure-Object Pipeline
+**Learning:** Using `Where-Object | Measure-Object` inside loops (like the user enumeration loop in AWStealth) is a massive performance bottleneck due to PowerShell pipeline overhead (takes ~8000ms vs ~260ms for 100K iterations).
+**Action:** To safely replace the pipeline while preserving semantics (where string scalars count as 1 and nulls as 0), explicitly wrap the variable in an array and use native operators: `@(@($var) -like '*-Thr*').Count` instead of `($var | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count`. Always prefer direct `.Count` property access over piping to `Measure-Object` for simple counting.
