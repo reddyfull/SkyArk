@@ -1,0 +1,3 @@
+## 2024-06-25 - Avoid String Piping to Where-Object
+**Learning:** In PowerShell, counting specific delimiter characters within a scalar string using `($var | Where-Object {$_ -eq ','})` fails to work correctly. A string is treated as a single item in the pipeline and will yield 0, leading to a logic bug. Even when used in arrays, piping is significantly slower than string manipulation or direct property access.
+**Action:** When counting characters or splitting strings, always use string methods like `.Split(',')` (e.g., `$var.Split(',').Count - 1`). For filtering arrays safely, force the operand into an array and use native operators like `@(@($array) -like '*pattern*').Count` to handle both scalars and arrays properly and significantly improve performance.
