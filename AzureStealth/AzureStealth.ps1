@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 
 ###########################################################################################
@@ -659,10 +659,8 @@ function Write-AzureReconInfo {
     }
     $ofs = ','
 
-    $entityReconOutput = @()
-
-    $entityDict.Values | foreach {
-        $entityReconLine = [PSCustomObject][ordered] @{
+    $entityReconOutput = $entityDict.Values | foreach {
+        [PSCustomObject][ordered] @{
                 UserPrincipalName          = [string]$_.UserPrincipalName
                 DisplayName                = [string]$_.DisplayName
                 ObjectType                 = [string]$_.ObjectType
@@ -702,13 +700,11 @@ function Write-AzureReconInfo {
                 DeletionTimestamp          = [string]$_.DeletionTimestamp
                 ObjectId                   = [string]$_.ObjectId
         }       
-        $entityReconOutput += $entityReconLine
     }
     $entityReconOutput | Sort-Object UserPrincipalName | Export-Csv -path $usersInfoPath -NoTypeInformation
 
-    $tenantReconOutput = @()
-    $tenantDict.Values | foreach {
-        $tenantReconLine = [PSCustomObject][ordered] @{
+    $tenantReconOutput = $tenantDict.Values | foreach {
+        [PSCustomObject][ordered] @{
                 InitialDomainName      = [string]$_.InitialDomainName
                 DisplayName            = [string]$_.DisplayName
                 ObjectType             = [string]$_.ObjectType
@@ -732,7 +728,6 @@ function Write-AzureReconInfo {
                 DeletionTimestamp      = [string]$_.DeletionTimestamp
                 ObjectId               = [string]$_.ObjectId
         }       
-        $tenantReconOutput += $tenantReconLine
     }
     $tenantReconOutput | Sort-Object InitialDomainName | Export-Csv -path $directoryInfoPath -NoTypeInformation
 }
