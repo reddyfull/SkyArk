@@ -1,0 +1,3 @@
+## 2024-06-25 - Incorrect Where-Object Pipeline Logic for String Substring/Pattern Counting
+**Learning:** Using `($stringVar | Where-Object {$_ -eq ','} | Measure-Object).Count` to count commas in a scalar string `stringVar` always returns 0 because PowerShell treats the scalar string as a single object in the pipeline. It compares the entire string to `','`, which is false, filtering it out. A similar issue occurs with `-like` on strings without array splitting.
+**Action:** Use `.Split(',').Count - 1` to accurately count substring occurrences within a scalar string. For pattern matching against elements in a delimited string, split the string first, then wrap in an array and use `-like`: `@(@($stringVar.Split(',')) -like '*-Thr*').Count`.
