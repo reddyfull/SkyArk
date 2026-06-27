@@ -1,0 +1,3 @@
+## 2024-05-19 - Safe Array Optimization
+**Learning:** In PowerShell 3.0+, member enumeration (like `$collection.Property`) works equally well on `System.Collections.Generic.List[T]` as it does on standard `Object[]` arrays. This means we can safely refactor O(N^2) array concatenations (`+=`) to O(1) generic List `.Add()` operations without breaking downstream code that relies on property access.
+**Action:** When finding `+=` array anti-patterns, confidently swap them for `[System.Collections.Generic.List[System.Object]]` instead of worrying about `ArrayList` pipeline pollution or broken member enumeration.
