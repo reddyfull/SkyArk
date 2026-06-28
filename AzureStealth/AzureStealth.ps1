@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 
 ###########################################################################################
@@ -533,14 +533,14 @@ function Run-SubscriptionScan {
     "Microsoft.Authorization/roleDefinition/write", "Microsoft.Authorization/roleDefinitions/write",`
     "Microsoft.Authorization/roleAssignments/write","Microsoft.Authorization/classicAdministrators/write")
 
-    $privilegedRbacRoles = @()
+    $privilegedRbacRoles = [System.Collections.Generic.List[psobject]]::new()
     $allRbacRoles = Get-AzRoleDefinition
     $allRbacRoles | foreach {
         # If this is a built-in RBAC role
         if (-not $_.IsCustom) {
             if ($privilegedSubscriptionRoles -contains $_.Name) {
                 Add-RoleToDict -RoleObject $_ -RbacRole
-                $privilegedRbacRoles += $_
+                $privilegedRbacRoles.Add($_)
             }
         }
         # If this RBAC role is custom made
@@ -549,7 +549,7 @@ function Run-SubscriptionScan {
             $_.Actions | foreach {
                 if ($privilegedRBACPermissions -contains $_) {
                     Add-RoleToDict -RoleObject $customRole -RbacRole
-                    $privilegedRbacRoles += $customRole
+                    $privilegedRbacRoles.Add($customRole)
                 }
             }
         }
@@ -581,13 +581,13 @@ function Run-SubscriptionScan {
     }
     # Check for privileged RBAC roles
     $subscriptionRoleAssignments | Where-Object {$privilegedRbacRoles.Id -contains $_.RoleDefinitionId} | foreach {
-        $rbacPrivilegedEntities = @()
+        $rbacPrivilegedEntities = [System.Collections.Generic.List[string]]::new()
         $PrivilegeReason = $_.RoleDefinitionName
         $roleId = $_.RoleDefinitionId
         [string]$scope = "/subscriptions/" + $subscriptionId
         if ([string]$_.scope -eq $scope) {
             if ($_.ObjectType -eq "User") {
-                $rbacPrivilegedEntities += $_.ObjectId
+                $rbacPrivilegedEntities.Add($_.ObjectId)
             }
             elseif ($_.ObjectType -eq "Group") {
                 $newGroupCount = 1
@@ -608,7 +608,7 @@ function Run-SubscriptionScan {
                     $firstGroup = $false
                     $usersFromGroup = $usersFromGroup | where {$_.ObjectType -eq "User"}
 		    $usersFromGroup | foreach {
-                        $rbacPrivilegedEntities += $_.ObjectId
+                        $rbacPrivilegedEntities.Add($_.ObjectId)
                     }
                     $groupFromGroups = $usersFromGroup | where {$_.ObjectType -eq "Group"}
                     $newGroupCount = $groupFromGroups.count
@@ -659,7 +659,7 @@ function Write-AzureReconInfo {
     }
     $ofs = ','
 
-    $entityReconOutput = @()
+    $entityReconOutput = [System.Collections.Generic.List[psobject]]::new()
 
     $entityDict.Values | foreach {
         $entityReconLine = [PSCustomObject][ordered] @{
@@ -702,11 +702,11 @@ function Write-AzureReconInfo {
                 DeletionTimestamp          = [string]$_.DeletionTimestamp
                 ObjectId                   = [string]$_.ObjectId
         }       
-        $entityReconOutput += $entityReconLine
+        $entityReconOutput.Add($entityReconLine)
     }
     $entityReconOutput | Sort-Object UserPrincipalName | Export-Csv -path $usersInfoPath -NoTypeInformation
 
-    $tenantReconOutput = @()
+    $tenantReconOutput = [System.Collections.Generic.List[psobject]]::new()
     $tenantDict.Values | foreach {
         $tenantReconLine = [PSCustomObject][ordered] @{
                 InitialDomainName      = [string]$_.InitialDomainName
@@ -732,7 +732,7 @@ function Write-AzureReconInfo {
                 DeletionTimestamp      = [string]$_.DeletionTimestamp
                 ObjectId               = [string]$_.ObjectId
         }       
-        $tenantReconOutput += $tenantReconLine
+        $tenantReconOutput.Add($tenantReconLine)
     }
     $tenantReconOutput | Sort-Object InitialDomainName | Export-Csv -path $directoryInfoPath -NoTypeInformation
 }
@@ -764,8 +764,8 @@ function Write-AzureStealthResults {
         Write-Host "`n  [+] Completed the scan, the AzureStealth results should be presented in a new  window"
         Write-Host "`n      To get the results files - go to the results folder - in the following location:`n      `"$resultsFolder`""
         # In addition, present the results in an automated gridview using Out-GridView
-        $resultsForGridView = @()
-        $azureAdminsResults | foreach {$resultsForGridView += $_}
+        $resultsForGridView = [System.Collections.Generic.List[psobject]]::new()
+        $azureAdminsResults | foreach {$resultsForGridView.Add($_)}
         $resultsForGridView | Out-GridView -Title "AzureStealth Results"
     }
     else {
