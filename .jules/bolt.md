@@ -1,0 +1,3 @@
+## 2024-06-30 - Fix string element counting via pipeline
+**Learning:** When counting specific characters within a scalar string in PowerShell, piping the string to Where-Object treats the entire string as a single object and evaluates the condition against the entire string, yielding incorrect results (e.g. 0). Using string methods like .Split(',').Count - 1 or array forcing with -like (@(@($arr) -like '*-Thr*').Count) is correct and more performant.
+**Action:** Always use string methods or force an array context (@($var)) instead of piping scalar strings to Where-Object when counting elements or delimiter characters.
