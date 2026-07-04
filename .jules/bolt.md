@@ -1,0 +1,3 @@
+## 2024-05-24 - [Pipeline Overhead with Measure-Object]
+**Learning:** In PowerShell 3.0+, piping collections to `Measure-Object` for simple counting (e.g. `$(var | Measure-Object).count`) introduces massive pipeline overhead (e.g. ~2400ms for 1000 items). Direct property access `var.Count` evaluates natively in ~10ms. For variables that could be `$null` or a scalar, wrapping with native array syntax `@($var).Count` preserves exact pipeline counting semantics (null=0, scalar=1, array=N) safely and performantly, without needing methods like `.Split()` that can cause logic bugs.
+**Action:** Consistently replace `| Measure-Object` with `@($var).Count` across PowerShell scripts to achieve drop-in O(1) performance gains without breaking downstream logic.
