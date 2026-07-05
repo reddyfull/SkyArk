@@ -1,0 +1,3 @@
+## 2024-05-19 - [Logic bug and performance optimization: Where-Object on scalar properties]
+**Learning:** In PowerShell, using `Where-Object` on a scalar string (e.g. `$_.PolicyName | Where-Object {$_ -eq ','}`) treats the entire string as a single item in the pipeline, which returns 0. Also, `Measure-Object` inside a loop adds severe pipeline overhead compared to native property access.
+**Action:** When filtering or counting strings, cast to `[string]` and use `.Split(',')` for delimiters, and wrap in array combined with `-like` for substring matches (e.g., `@(@(([string]$_.PolicyName).Split(',')) -like '*-Thr*').Count`). This not only fixes scalar array-treatment logic bugs but dramatically improves loop execution speed by avoiding the pipeline overhead.
