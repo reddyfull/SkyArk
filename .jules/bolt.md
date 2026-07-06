@@ -1,0 +1,3 @@
+## 2023-10-24 - PowerShell Array Concatenation and Pipeline Optimization
+**Learning:** PowerShell array concatenation using `+=` inside loops allocates a new array each iteration, causing severe O(N^2) bottlenecks on large datasets. Furthermore, utilizing `Measure-Object` on pipelines or filtering Hashtables directly via pipeline carries extremely high overhead and logic bugs compared to native `.Count` property access and explicit `.Values` extraction.
+**Action:** Always replace `+=` array constructions in loops with `System.Collections.Generic.List[T].Add()` or pipeline direct assignments. When counting items, enforce `@($var).Count` over `Measure-Object` and ensure Dictionary enumerations invoke `.Values` explicitly before piping.
