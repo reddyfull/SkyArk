@@ -1,0 +1,3 @@
+## 2024-05-24 - [Avoid Pipeline Overhead in Counting]
+**Learning:** In PowerShell, using `Where-Object` chained with `Measure-Object` on scalars (like strings) or arrays creates massive pipeline overhead. For instance, counting delimiters via pipeline takes hundreds of milliseconds, whereas using native `.Split()` takes almost no time.
+**Action:** When counting specific delimiter characters within a scalar string, do not use `($var | Where-Object {$_ -eq ','} | Measure-Object)`. Instead, use `.Split(',')` (e.g., `$var.Split(',').Count - 1`) for accurate and performant counting. For arrays, wrap the variable and use native `-like` operators (e.g., `@(@($var) -like 'pattern').Count`).
