@@ -1,0 +1,3 @@
+## 2024-07-11 - PowerShell array counting pipeline overhead
+**Learning:** In PowerShell, using `| Measure-Object).Count` creates a massive O(N) performance bottleneck when applied inside thousands of loops due to the heavy overhead of instantiating and handling the pipeline. For scalar string items, using the pipeline also produces incorrect counts compared to `.Split(',').Count - 1`.
+**Action:** Always prefer direct property access like `$array.Count` for arrays/lists, which is evaluated instantaneously. When evaluating string items where array logic is intended or null handling is required, cast it to an array explicitly (`@(@($var) -like 'pattern')`) or use `.Split().Count - 1` to process string components efficiently and accurately.
