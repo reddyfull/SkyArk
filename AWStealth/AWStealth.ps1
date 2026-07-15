@@ -1,4 +1,4 @@
-<#
+﻿<#
 
 #################################################################
 #                                                               #  
@@ -367,7 +367,7 @@ function Check-PrivilegedPolicy {
                     # aws ec2 associate-iam-instance-profile --instance-id i-003116a190790073d --iam-instance-profile Name=shadowProfile 
                     $permissionActions = $_.Action | ? {($_ -eq "iam:CreateInstanceProfile") -or ($_ -eq "iam:AddRoleToInstanceProfile") -or ($_ -eq "iam:PassRole") -or ($_ -eq "ec2:AssociateIamInstanceProfile")}
                     $permissionResources = $_.Resource | ? {($_ -eq "*") -or ($_ -eq "arn:aws:iam::*:role/*") -or ($_ -eq "arn:aws:iam::*:instance-profile/*") -or ($_ -eq "arn:aws:ec2:*:*:instance/*")}
-                    if (($($permissionResources | Measure-Object).count -ge 1) -and ($permissionActions.count -ge 3)) {
+                    if ((@($permissionResources).Count -ge 1) -and ($permissionActions.count -ge 3)) {
                         $isPrivileged, $privilegeType = Mark-privilegedPolicy -privilegeType $privilegeType -newPrivilegeType "ShadowModifyInstanceProfiles"
                     }
                     #############################################################################################################################################################(11)
@@ -698,7 +698,7 @@ function Check-ManagedPolicies {
                     $entityLine = Build-EntityInfoLine -entityType "Group" -policyType "ManagedPolicy" -entityObject $groupInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition                
                     $privilegedEntitiesDB.add($groupInfo.Group.Arn, $entityLine)
                     # insert the privileged users that are members of the privilege group
-                    if ($($groupInfo.Users.UserName | Measure-Object).count -gt 0) {
+                    if (@($groupInfo.Users.UserName).Count -gt 0) {
                         $groupInfo.Users.UserName | foreach {
                             $userInfo = Get-IAMUser -UserName $_
                             $groupName = $groupInfo.Group.GroupName
@@ -769,7 +769,7 @@ function Check-InlinePolicies {
         $userName = $_.UserName
         $inlineUserPolicy = Get-IAMUserPolicyList -UserName $userName
         if ($inlineUserPolicy) {
-            $inlineUserPoliciesCounter += $($inlineUserPolicy| Measure-Object).count
+            $inlineUserPoliciesCounter += @($inlineUserPolicy).Count
             $inlineUserPolicy | foreach {
                 $inlineUserPolicyData = Get-IAMUserPolicy -UserName $userName -PolicyName $_
                 $inlineUserPolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineUserPolicyData.PolicyDocument)
@@ -820,7 +820,7 @@ function Check-InlinePolicies {
         # Get a list of the inline policies that are embedded in the specified group.
         $inlineGroupPolicy = Get-IAMGroupPolicyList -GroupName $GroupName 
         if ($inlineGroupPolicy) {
-            $inlineGroupPoliciesCounter += $($inlineGroupPolicy | Measure-Object).count
+            $inlineGroupPoliciesCounter += @($inlineGroupPolicy).Count
             $inlineGroupPolicy | foreach {
                 $inlineGroupPolicyData = Get-IAMGroupPolicy -GroupName $GroupName -PolicyName $_ 
                 $inlineGroupPolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineGroupPolicyData.PolicyDocument)
@@ -890,7 +890,7 @@ function Check-InlinePolicies {
         $roleName = $_.RoleName
         $inlineRolePolicy = Get-IAMRolePolicyList -RoleName $roleName
         if ($inlineRolePolicy) {
-            $inlineRolePoliciesCounter += $($inlineRolePoliciesCounter | Measure-Object).count
+            $inlineRolePoliciesCounter += @($inlineRolePolicy).Count
             $inlineRolePolicy | foreach {
                 $inlineRolePolicyData = Get-IAMRolePolicy  -RoleName $roleName -PolicyName $_ 
                 $inlineRolePolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineRolePolicyData.PolicyDocument)
@@ -953,26 +953,26 @@ function Write-Report {
     $reportOutputArray = New-Object System.Collections.Generic.List[System.String]
 
     $allPrivivlgedEntities = $privilegedEntitiesDB | select "Arn" -Unique
-    $numAllPrivivlgedEntities = $($allPrivivlgedEntities | Measure-Object).count
+    $numAllPrivivlgedEntities = @($allPrivivlgedEntities).Count
     Write-host "-> AWStealth discovered $numAllPrivivlgedEntities privileged entities" -BackgroundColor DarkRed
     $awsAccount = (([string]$allPrivivlgedEntities[0]).Split(":"))[4]
     $shadowAdmins = $privilegedEntitiesDB | Where-Object {$_.PrivilegeType -like "*shadow*"} 
-    $numShadowAdmins = $($shadowAdmins | Measure-Object).count
+    $numShadowAdmins = @($shadowAdmins).Count
     if ($numShadowAdmins -ge 1) {
          Write-host "-> Discovered $numShadowAdmins AWS Shadow Admins" -BackgroundColor DarkRed
     }
     $privilegedUsers = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "User"}
-    $numPrivilegedUsers = $($privilegedUsers | Measure-Object).count
+    $numPrivilegedUsers = @($privilegedUsers).Count
     $privilegedGroups = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Group"}
-    $numPrivilegedGroups = $($privilegedGroups | Measure-Object).count
+    $numPrivilegedGroups = @($privilegedGroups).Count
     $privilegedRoles = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Role"}
-    $numPivilegedRoles = $($privilegedRoles | Measure-Object).count
+    $numPivilegedRoles = @($privilegedRoles).Count
     $privilegedUserNoMFA = $privilegedEntitiesDB | Where-Object {$_.MFAenable -eq "NoMFA"} 
-    $numPrivilegedUserNoMFA = $($privilegedUserNoMFA | Measure-Object).count
+    $numPrivilegedUserNoMFA = @($privilegedUserNoMFA).Count
     $privilegedUsersNoCondition = $privilegedEntitiesDB | Where-Object {$_.policyCondition -like "*noCon*"} 
-    $numPrivilegedUsersNoCondition = $($privilegedUsersNoCondition | Measure-Object).count
+    $numPrivilegedUsersNoCondition = @($privilegedUsersNoCondition).Count
     $privielgedUsersNotSecured = $privilegedEntitiesDB | Where-Object {($_.policyCondition -like "*noCon*") -and ($_.MFAenable -eq "NoMFA")} 
-    $numPivielgedUsersNotSecured = $($privielgedUsersNotSecured| Measure-Object).count
+    $numPivielgedUsersNotSecured = @($privielgedUsersNotSecured).Count
     $scanTime = Get-Date -Format g
 
     $reportOutputArray.Add("")
@@ -1047,8 +1047,8 @@ function Write-Report {
     $counter = 0
     $usersFromGroups = @()
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
+        $countPolicyNames = $_.PolicyName.Split(',').Count - 1
+        $countPoliciesFromGroups = @(@($_.PolicyName.Split(',')) -like '*-Thr*').Count
         if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
             $usersFromGroups += $_.EntityName
         }
@@ -1204,7 +1204,7 @@ function Scan-AWShadowAdmins {
 
     Write-host "`n[+] Discovered" $privilegedEntitiesDB.Count "privileged entities in the scanned AWS environment" -ForegroundColor green
 
-    if ($($privilegedEntitiesDB | Measure-Object).count -eq 0) {
+    if (@($privilegedEntitiesDB).Count -eq 0) {
         Write-host "Sorry, the scan didn't find any AWS Shadow Admin.`nPlease try again.`nCheck the prerequisites - including the credentials you are using in the scan and your internet connection" -ForegroundColor red
     }
     else {
