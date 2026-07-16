@@ -1,0 +1,3 @@
+## 2024-07-16 - [Fix logic bug and pipeline overhead in AWStealth reporting]
+**Learning:** Using `($var | Where-Object {$_ -eq ','} | Measure-Object).Count` to count delimiters in a string not only creates huge pipeline overhead (578ms vs 70ms for 1k iterations) but is logically flawed because PowerShell treats a string as a single item in the pipeline. It won't find delimiters inside the string.
+**Action:** Use `.Split(',')` for string logic, or if array semantics are required, ensure the variable is wrapped in an array `@(@($var))` before applying native operators like `-like` or `-eq` to count elements safely and quickly.
