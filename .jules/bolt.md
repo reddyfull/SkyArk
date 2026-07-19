@@ -1,0 +1,3 @@
+## 2024-07-19 - [Optimize PowerShell Collection Counting]
+**Learning:** Using `Measure-Object` and pipeline operators (`Where-Object`) to count items in arrays or strings in PowerShell is extremely slow because of pipeline overhead. We found an opportunity to drastically improve script execution time by avoiding pipeline commands for counting.
+**Action:** Use `.Count` property directly on variables instead of `| Measure-Object`. For filtering strings in arrays for counts, use native array filtering operators like `@(@(array) -like "pattern").Count`. For counting substring occurrences within strings, use `.Split("char").Count - 1`.
