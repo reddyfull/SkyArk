@@ -1,0 +1,3 @@
+## 2024-07-20 - [Optimize Where-Object Pipeline on Scalars]
+**Learning:** Using `Where-Object | Measure-Object` pipelines inside a loop on a scalar variable or small arrays can result in severe performance bottlenecks in PowerShell (e.g., taking ~550ms vs ~20ms per 1000 iterations). Attempting to replace the pipeline with string methods like `.Split()` doesn't exactly match the semantics of the original logic which treats a string scalar as a 1-item array for filtering purposes.
+**Action:** To safely remove pipeline overhead while preserving exact original behavior (handling scalars, arrays, and nulls properly), force the operand into an array and use PowerShell's native array filtering operators: `@(@($var) -eq ',').Count` or `@(@($var) -like '*-Thr*').Count`.
