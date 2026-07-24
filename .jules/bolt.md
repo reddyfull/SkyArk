@@ -1,0 +1,6 @@
+## 2023-07-24 - [Avoid Pipeline with Dictionary Values]
+**Learning:** [When iterating over large dictionary values (`$dict.Values`), piping into `foreach` or `Where-Object` creates large overhead due to boxing/unboxing dictionary entries vs values and the pipeline overhead itself. The overhead can be removed with native loops or direct assignments, but we need to verify first.]
+**Action:** [Check performance bottlenecks in script and optimize by using faster methods.]
+## 2026-07-24 - [Array Concatenation in PowerShell]
+**Learning:** [Using += to append to an array in a loop causes O(N^2) overhead because arrays are immutable. Direct assignment from a pipeline (e.g., $array = $items | foreach { ... }) is much faster and O(N).]
+**Action:** [Always use direct assignment or List<T> instead of += for building collections in loops.]
