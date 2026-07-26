@@ -1,0 +1,3 @@
+## 2024-05-24 - PowerShell Pipeline Overhead in Enumeration
+**Learning:** Using `| Measure-Object` inside loops carries severe O(N) pipeline setup overhead per iteration, making it drastically slower than native property access (e.g., `4775ms` vs `9ms` for 1000 items). Furthermore, attempting to parse characters from strings via `Where-Object {$_ -eq ','}` fails silently returning 0 because the string doesn't unroll.
+**Action:** Always prefer `@($var).Count` or `.Count` property access over `Measure-Object` in performance-sensitive PowerShell code. For character counts in strings, use `.Split(',').Count - 1`.
