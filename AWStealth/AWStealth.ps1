@@ -1045,12 +1045,13 @@ function Write-Report {
     $reportOutputArray.Add("")
     $reportOutputArray.Add("List of users with direct privileges:")
     $counter = 0
-    $usersFromGroups = @()
+    $usersFromGroups = New-Object System.Collections.Generic.List[System.String]
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
+        $pName = $_.PolicyName
+        $countPolicyNames = @(@($pName) -eq ',').Count
+        $countPoliciesFromGroups = @(@($pName) -like '*-Thr*').Count
         if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
-            $usersFromGroups += $_.EntityName
+            $usersFromGroups.Add($_.EntityName)
         }
         else {
             $counter += 1
