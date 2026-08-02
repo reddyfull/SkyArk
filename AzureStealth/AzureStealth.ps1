@@ -659,10 +659,8 @@ function Write-AzureReconInfo {
     }
     $ofs = ','
 
-    $entityReconOutput = @()
-
-    $entityDict.Values | foreach {
-        $entityReconLine = [PSCustomObject][ordered] @{
+    $entityReconOutput = $entityDict.Values | foreach {
+        [PSCustomObject][ordered] @{
                 UserPrincipalName          = [string]$_.UserPrincipalName
                 DisplayName                = [string]$_.DisplayName
                 ObjectType                 = [string]$_.ObjectType
@@ -702,13 +700,11 @@ function Write-AzureReconInfo {
                 DeletionTimestamp          = [string]$_.DeletionTimestamp
                 ObjectId                   = [string]$_.ObjectId
         }       
-        $entityReconOutput += $entityReconLine
     }
     $entityReconOutput | Sort-Object UserPrincipalName | Export-Csv -path $usersInfoPath -NoTypeInformation
 
-    $tenantReconOutput = @()
-    $tenantDict.Values | foreach {
-        $tenantReconLine = [PSCustomObject][ordered] @{
+    $tenantReconOutput = $tenantDict.Values | foreach {
+        [PSCustomObject][ordered] @{
                 InitialDomainName      = [string]$_.InitialDomainName
                 DisplayName            = [string]$_.DisplayName
                 ObjectType             = [string]$_.ObjectType
@@ -732,7 +728,6 @@ function Write-AzureReconInfo {
                 DeletionTimestamp      = [string]$_.DeletionTimestamp
                 ObjectId               = [string]$_.ObjectId
         }       
-        $tenantReconOutput += $tenantReconLine
     }
     $tenantReconOutput | Sort-Object InitialDomainName | Export-Csv -path $directoryInfoPath -NoTypeInformation
 }
@@ -764,9 +759,7 @@ function Write-AzureStealthResults {
         Write-Host "`n  [+] Completed the scan, the AzureStealth results should be presented in a new  window"
         Write-Host "`n      To get the results files - go to the results folder - in the following location:`n      `"$resultsFolder`""
         # In addition, present the results in an automated gridview using Out-GridView
-        $resultsForGridView = @()
-        $azureAdminsResults | foreach {$resultsForGridView += $_}
-        $resultsForGridView | Out-GridView -Title "AzureStealth Results"
+        $azureAdminsResults | Out-GridView -Title "AzureStealth Results"
     }
     else {
 	$cloudDriveInfo = Get-CloudDrive
