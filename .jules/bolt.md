@@ -1,0 +1,5 @@
+## 2024-05-14 - Optimize Pipeline Overheads in AWStealth
+
+**Learning:** `Measure-Object` and `Where-Object` on pipelines have massive overheads in PowerShell compared to direct property access or native operators. Also, doing `Where-Object {$_ -eq ','}` on a single string (not an array) evaluates the string as one object, which never matches `','`, leading to logic bugs. The script `AWStealth.ps1` had exactly this bug on line 1050, resulting in `0` every time. Also on line 893, it increments `inlineRolePoliciesCounter` with its *own* count (`$($inlineRolePoliciesCounter | Measure-Object).count`), rather than the new policy count.
+
+**Action:** Replaced `Measure-Object` pipelines with direct `@($var).Count` property access. Replaced `Where-Object {$_ -eq ','}` logic with `([string]$var -split ',').Count - 1` for accurate character counting. Replaced `Where-Object {$_ -like '*-Thr*'}` on a string with `@(@([string]$var -split ',') -like '*-Thr*').Count`. Fixed line 893 to use the count of `$inlineRolePolicy`.
