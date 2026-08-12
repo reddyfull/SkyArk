@@ -1,7 +1,7 @@
 <#
 
 #################################################################
-#                                                               #  
+#                                                               #
 #  AWStealth -  Detect Shadow Admins in AWS cloud environments  #
 #                                                               #
 #################################################################
@@ -21,7 +21,7 @@ It's time to discover the most privileged AWS entities
 #################################################################
 
 Versions Notes:
- 
+
 Version 0.1: 26.2.18
 version 0.2: 4.3.18
 version 0.3: 8.3.18
@@ -40,15 +40,15 @@ $AWStealthVersion = "v1.6"
 
 $AWStealth = @"
 ------------------------------------------------------
-      __          _______ _             _ _   _     
-     /\ \        / / ____| |           | | | | |    
-    /  \ \  /\  / / (___ | |_ ___  __ _| | |_| |__  
-   / /\ \ \/  \/ / \___ \| __/ _ \/ _`` | | __| '_ \ 
+      __          _______ _             _ _   _
+     /\ \        / / ____| |           | | | | |
+    /  \ \  /\  / / (___ | |_ ___  __ _| | |_| |__
+   / /\ \ \/  \/ / \___ \| __/ _ \/ _`` | | __| '_ \
   / ____ \  /\  /  ____) | ||  __/ (_| | | |_| | | |
  /_/    \_\/  \/  |_____/ \__\___|\__,_|_|\__|_| |_|
-                                                    
+
 ------------------------------------------------------
-"@                                   
+"@
 
 $Author = @"
           Author:  Asaf Hecht - @Hechtov
@@ -65,7 +65,7 @@ Write-Output "It's time to discover the most privileged AWS entities`n"
 Write-Output $Author
 
 try {
-    $isAwsPowerShellModuleLoaded = (Get-Module) | Where-Object {$_.Name -eq "AWSPowerShell"} 
+    $isAwsPowerShellModuleLoaded = (Get-Module) | Where-Object {$_.Name -eq "AWSPowerShell"}
     if (-not $isAwsPowerShellModuleLoaded){
         Write-Host "[+] Searching for the AWS PowerShell module..."
     }
@@ -155,10 +155,10 @@ function Load-AWScred {
     if (-not $DefaultRegion) {
     # Removed the following because IAM is cross region service, and currently the tool only query the IAM [18/8/20]
     #   $DefaultRegion = read-host "What is your AWS default region (e.g. `"us-east-1`")?"
-    	$DefaultRegion = "us-east-1"
+	$DefaultRegion = "us-east-1"
     }
     Set-DefaultAWSRegion -Region $DefaultRegion
-    
+
     if ($SessionToken) {
         $currentUser = Get-STSCallerIdentity
         $currentUserName = $currentUser.Arn
@@ -177,9 +177,9 @@ function Mark-privilegedPolicy {
         $privilegeType,
         [string]
         $newPrivilegeType
-    )   
+    )
     $isPrivileged = $true
-    
+
     if ($privilegeType -eq "") {
         $privilegeType = $newPrivilegeType
     }
@@ -212,7 +212,7 @@ function Check-PrivilegedPolicy {
     #   DatabaseAdministrator - Grants full access permissions to AWS services and actions required to set up and configure AWS database services.
     #   PowerUserAccess - Provides full access to AWS services and resources, but does not allow management of Users and groups.
     #   SystemAdministrator - Grants full access permissions necessary for resources required for application and development operations.
-    
+
     if ($policyName -eq "AdministratorAccess") {
         $isPrivileged = $true
         $privilegeType = "FullAWSAdmin"
@@ -361,17 +361,17 @@ function Check-PrivilegedPolicy {
                     }
                     #############################################################################################################################################################(10)
                     # check for the sensitive "modifyInstanceProfile" permissions to other entities
-                    # example for a dangerous usage with AWS CLI: 
+                    # example for a dangerous usage with AWS CLI:
                     # aws iam create-instance-profile --instance-profile-name shadowProfile
                     # aws iam add-role-to-instance-profile --role-name AdminRole --instance-profile-name shadowProfile (need the PassRole permission)
-                    # aws ec2 associate-iam-instance-profile --instance-id i-003116a190790073d --iam-instance-profile Name=shadowProfile 
+                    # aws ec2 associate-iam-instance-profile --instance-id i-003116a190790073d --iam-instance-profile Name=shadowProfile
                     $permissionActions = $_.Action | ? {($_ -eq "iam:CreateInstanceProfile") -or ($_ -eq "iam:AddRoleToInstanceProfile") -or ($_ -eq "iam:PassRole") -or ($_ -eq "ec2:AssociateIamInstanceProfile")}
                     $permissionResources = $_.Resource | ? {($_ -eq "*") -or ($_ -eq "arn:aws:iam::*:role/*") -or ($_ -eq "arn:aws:iam::*:instance-profile/*") -or ($_ -eq "arn:aws:ec2:*:*:instance/*")}
-                    if (($($permissionResources | Measure-Object).count -ge 1) -and ($permissionActions.count -ge 3)) {
+                    if ((@($permissionResources).Count -ge 1) -and (@($permissionActions).Count -ge 3)) {
                         $isPrivileged, $privilegeType = Mark-privilegedPolicy -privilegeType $privilegeType -newPrivilegeType "ShadowModifyInstanceProfiles"
                     }
                     #############################################################################################################################################################(11)
-                    # check for the sensitive "UpdateAssumeRolePolicy" permission 
+                    # check for the sensitive "UpdateAssumeRolePolicy" permission
                     # example for a dangerous usage with AWS CLI: "aws iam update-assume-role-policy --role-name shadowRole --policy-document file:///Work/AWS/AWShadowAdmins/Demo/RoleTrustPolicy.json"
                     if ($_.Action | ? {($_ -eq "iam:UpdateAssumeRolePolicy")}) {
                         if ($_.Resource | ? {($_ -eq "*") -or ($_ -eq "arn:aws:iam::*:role/*")}) {
@@ -456,7 +456,7 @@ function Check-PrivilegedPolicy {
                         if ($_.Resource | ? {($_ -eq "*") -or ($_ -eq "arn:aws:ec2:*:*:instance/*")}) {
                             $isPrivileged, $privilegeType = Mark-privilegedPolicy -privilegeType $privilegeType -newPrivilegeType "ShadowRunNewInstancesWithRoles"
                         }
-                    }          
+                    }
                     #############################################################################################################################################################(25)
                     # The following permissions scenarios were described by Rhino Security Labs:
                     # https://rhinosecuritylabs.com/aws/aws-privilege-escalation-methods-mitigation/
@@ -477,7 +477,7 @@ function Check-PrivilegedPolicy {
                             if ($_.Resource | ? {($_ -eq "*") -or ($_ -eq "arn:aws:glue:*:*:catalog/*")}) {
                                 $isPrivileged, $privilegeType = Mark-privilegedPolicy -privilegeType $privilegeType -newPrivilegeType "ShadowGlueDevEndpoint"
                             }
-                        } 
+                        }
                         # Passing a role to CloudFormation
                         if ($_.Action | ? {($_ -eq "cloudformation:CreateStack")}){
                             if ($_.Resource | ? {($_ -eq "*") -or ($_ -eq "arn:aws:cloudformation:*:*:stack/*/*")}) {
@@ -559,7 +559,7 @@ function Check-PrivilegedPolicy {
 }
 
 
-# Function for building the entities' information data-line, this is the structure of privilegedEntitiesDB 
+# Function for building the entities' information data-line, this is the structure of privilegedEntitiesDB
 function Build-EntityInfoLine {
     [CmdletBinding()]
     Param (
@@ -677,8 +677,8 @@ function Check-ManagedPolicies {
                     $privilegedEntitiesDB[$userInfo.Arn] = $entityLine
                 }
                 else {
-                    $entityLine = Build-EntityInfoLine -entityType "User" -policyType "ManagedPolicy" -entityObject $userInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition              
-                    $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)                
+                    $entityLine = Build-EntityInfoLine -entityType "User" -policyType "ManagedPolicy" -entityObject $userInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition
+                    $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)
                 }
             }
             # analyze groups
@@ -695,10 +695,10 @@ function Check-ManagedPolicies {
                     $privilegedEntitiesDB[$groupInfo.Group.Arn] = $entityLine
                 }
                 else {
-                    $entityLine = Build-EntityInfoLine -entityType "Group" -policyType "ManagedPolicy" -entityObject $groupInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition                
+                    $entityLine = Build-EntityInfoLine -entityType "Group" -policyType "ManagedPolicy" -entityObject $groupInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition
                     $privilegedEntitiesDB.add($groupInfo.Group.Arn, $entityLine)
                     # insert the privileged users that are members of the privilege group
-                    if ($($groupInfo.Users.UserName | Measure-Object).count -gt 0) {
+                    if (@($groupInfo.Users.UserName).Count -gt 0) {
                         $groupInfo.Users.UserName | foreach {
                             $userInfo = Get-IAMUser -UserName $_
                             $groupName = $groupInfo.Group.GroupName
@@ -713,11 +713,11 @@ function Check-ManagedPolicies {
                             }
                             else {
                                 $entityLine = Build-EntityInfoLine -entityType "User" -policyType "ManagedPolicy" -entityObject $userInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition
-                                $entityLine.PolicyName += "-Through`"$groupName`"Group"                
-                                $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)                
+                                $entityLine.PolicyName += "-Through`"$groupName`"Group"
+                                $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)
                             }
                         }
-                    }                
+                    }
                 }
             }
             # analyze roles
@@ -733,10 +733,10 @@ function Check-ManagedPolicies {
                     $privilegedEntitiesDB[$roleInfo.Arn] = $entityLine
                 }
                 else {
-                    $entityLine = Build-EntityInfoLine -entityType "Role" -policyType "ManagedPolicy" -entityObject $roleInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition               
-                    $privilegedEntitiesDB.add($roleInfo.Arn, $entityLine)            
+                    $entityLine = Build-EntityInfoLine -entityType "Role" -policyType "ManagedPolicy" -entityObject $roleInfo -managedPolicyJsonStr $managedPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition
+                    $privilegedEntitiesDB.add($roleInfo.Arn, $entityLine)
                 }
-            } 
+            }
         }
         try {
             $tenPrcs = [math]::round(($numManagedPolicies/10),0)
@@ -769,7 +769,7 @@ function Check-InlinePolicies {
         $userName = $_.UserName
         $inlineUserPolicy = Get-IAMUserPolicyList -UserName $userName
         if ($inlineUserPolicy) {
-            $inlineUserPoliciesCounter += $($inlineUserPolicy| Measure-Object).count
+            $inlineUserPoliciesCounter += @($inlineUserPolicy).Count
             $inlineUserPolicy | foreach {
                 $inlineUserPolicyData = Get-IAMUserPolicy -UserName $userName -PolicyName $_
                 $inlineUserPolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineUserPolicyData.PolicyDocument)
@@ -790,8 +790,8 @@ function Check-InlinePolicies {
                         $privilegedEntitiesDB[$userInfo.Arn] = $entityLine
                     }
                     else {
-                        $entityLine = Build-EntityInfoLine -entityType "User" -policyType "InlinePolicy" -entityObject $userInfo -managedPolicyJsonStr $inlineUserPolicyStr -policyName $_ -privilegeType $privilegeType -policyCondition $policyCondition               
-                        $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)                
+                        $entityLine = Build-EntityInfoLine -entityType "User" -policyType "InlinePolicy" -entityObject $userInfo -managedPolicyJsonStr $inlineUserPolicyStr -policyName $_ -privilegeType $privilegeType -policyCondition $policyCondition
+                        $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)
                     }
                 }
             }
@@ -818,11 +818,11 @@ function Check-InlinePolicies {
     $groupCounter++
         $GroupName = $_.GroupName
         # Get a list of the inline policies that are embedded in the specified group.
-        $inlineGroupPolicy = Get-IAMGroupPolicyList -GroupName $GroupName 
+        $inlineGroupPolicy = Get-IAMGroupPolicyList -GroupName $GroupName
         if ($inlineGroupPolicy) {
-            $inlineGroupPoliciesCounter += $($inlineGroupPolicy | Measure-Object).count
+            $inlineGroupPoliciesCounter += @($inlineGroupPolicy).Count
             $inlineGroupPolicy | foreach {
-                $inlineGroupPolicyData = Get-IAMGroupPolicy -GroupName $GroupName -PolicyName $_ 
+                $inlineGroupPolicyData = Get-IAMGroupPolicy -GroupName $GroupName -PolicyName $_
                 $inlineGroupPolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineGroupPolicyData.PolicyDocument)
                 $inlineGroupPolicyJson = $inlineGroupPolicyStr | ConvertFrom-Json
                 $isPolicyPrivileged, $privilegeType, $policyCondition = Check-PrivilegedPolicy -policy $inlineGroupPolicyJson
@@ -840,7 +840,7 @@ function Check-InlinePolicies {
                         $privilegedEntitiesDB[$groupInfo.Group.Arn] = $entityLine
                     }
                     else {
-                        $entityLine = Build-EntityInfoLine -entityType "Group" -policyType "InlinePolicy"-entityObject $groupInfo -managedPolicyJsonStr $inlineGroupPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition               
+                        $entityLine = Build-EntityInfoLine -entityType "Group" -policyType "InlinePolicy"-entityObject $groupInfo -managedPolicyJsonStr $inlineGroupPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition
                         $privilegedEntitiesDB.add($groupInfo.Group.Arn, $entityLine)
                         $groupName = $groupInfo.Group.GroupName
                         # insert the privileged users that are members of the privilege group
@@ -857,11 +857,11 @@ function Check-InlinePolicies {
                                 $privilegedEntitiesDB[$userInfo.Arn] = $entityLine
                             }
                             else {
-                                $entityLine = Build-EntityInfoLine -entityType "User" -policyType "InlinePolicy" -entityObject $userInfo -managedPolicyJsonStr $inlineGroupPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition              
-                                $entityLine.PolicyName += "-Through`"$groupName`"Group" 
-                                $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)                
+                                $entityLine = Build-EntityInfoLine -entityType "User" -policyType "InlinePolicy" -entityObject $userInfo -managedPolicyJsonStr $inlineGroupPolicyStr -policyName $policyName -privilegeType $privilegeType -policyCondition $policyCondition
+                                $entityLine.PolicyName += "-Through`"$groupName`"Group"
+                                $privilegedEntitiesDB.add($userInfo.Arn, $entityLine)
                             }
-                        }                
+                        }
                     }
 
                 }
@@ -890,9 +890,9 @@ function Check-InlinePolicies {
         $roleName = $_.RoleName
         $inlineRolePolicy = Get-IAMRolePolicyList -RoleName $roleName
         if ($inlineRolePolicy) {
-            $inlineRolePoliciesCounter += $($inlineRolePoliciesCounter | Measure-Object).count
+            $inlineRolePoliciesCounter += @($inlineRolePolicy).Count
             $inlineRolePolicy | foreach {
-                $inlineRolePolicyData = Get-IAMRolePolicy  -RoleName $roleName -PolicyName $_ 
+                $inlineRolePolicyData = Get-IAMRolePolicy  -RoleName $roleName -PolicyName $_
                 $inlineRolePolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineRolePolicyData.PolicyDocument)
                 $inlineRolePolicyJson = $inlineRolePolicyStr | ConvertFrom-Json
                 $isPolicyPrivileged, $privilegeType, $policyCondition = Check-PrivilegedPolicy -policy $inlineRolePolicyJson
@@ -909,9 +909,9 @@ function Check-InlinePolicies {
                         $privilegedEntitiesDB[$roleInfo.Arn] = $entityLine
                     }
                     else {
-                        $entityLine = Build-EntityInfoLine -entityType "Role" -policyType "InlinePolicy" -entityObject $roleInfo -managedPolicyJsonStr $inlineRolePolicyStr -policyName $_ -privilegeType $privilegeType -policyCondition $policyCondition              
+                        $entityLine = Build-EntityInfoLine -entityType "Role" -policyType "InlinePolicy" -entityObject $roleInfo -managedPolicyJsonStr $inlineRolePolicyStr -policyName $_ -privilegeType $privilegeType -policyCondition $policyCondition
                         $privilegedEntitiesDB.add($roleInfo.Arn, $entityLine)
-                        # to add all the entites that can assume the privileged role                
+                        # to add all the entites that can assume the privileged role
                     }
                 }
             }
@@ -953,26 +953,26 @@ function Write-Report {
     $reportOutputArray = New-Object System.Collections.Generic.List[System.String]
 
     $allPrivivlgedEntities = $privilegedEntitiesDB | select "Arn" -Unique
-    $numAllPrivivlgedEntities = $($allPrivivlgedEntities | Measure-Object).count
+    $numAllPrivivlgedEntities = @($allPrivivlgedEntities).Count
     Write-host "-> AWStealth discovered $numAllPrivivlgedEntities privileged entities" -BackgroundColor DarkRed
     $awsAccount = (([string]$allPrivivlgedEntities[0]).Split(":"))[4]
-    $shadowAdmins = $privilegedEntitiesDB | Where-Object {$_.PrivilegeType -like "*shadow*"} 
-    $numShadowAdmins = $($shadowAdmins | Measure-Object).count
+    $shadowAdmins = $privilegedEntitiesDB | Where-Object {$_.PrivilegeType -like "*shadow*"}
+    $numShadowAdmins = @($shadowAdmins).Count
     if ($numShadowAdmins -ge 1) {
          Write-host "-> Discovered $numShadowAdmins AWS Shadow Admins" -BackgroundColor DarkRed
     }
     $privilegedUsers = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "User"}
-    $numPrivilegedUsers = $($privilegedUsers | Measure-Object).count
+    $numPrivilegedUsers = @($privilegedUsers).Count
     $privilegedGroups = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Group"}
-    $numPrivilegedGroups = $($privilegedGroups | Measure-Object).count
+    $numPrivilegedGroups = @($privilegedGroups).Count
     $privilegedRoles = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Role"}
-    $numPivilegedRoles = $($privilegedRoles | Measure-Object).count
-    $privilegedUserNoMFA = $privilegedEntitiesDB | Where-Object {$_.MFAenable -eq "NoMFA"} 
-    $numPrivilegedUserNoMFA = $($privilegedUserNoMFA | Measure-Object).count
-    $privilegedUsersNoCondition = $privilegedEntitiesDB | Where-Object {$_.policyCondition -like "*noCon*"} 
-    $numPrivilegedUsersNoCondition = $($privilegedUsersNoCondition | Measure-Object).count
-    $privielgedUsersNotSecured = $privilegedEntitiesDB | Where-Object {($_.policyCondition -like "*noCon*") -and ($_.MFAenable -eq "NoMFA")} 
-    $numPivielgedUsersNotSecured = $($privielgedUsersNotSecured| Measure-Object).count
+    $numPivilegedRoles = @($privilegedRoles).Count
+    $privilegedUserNoMFA = $privilegedEntitiesDB | Where-Object {$_.MFAenable -eq "NoMFA"}
+    $numPrivilegedUserNoMFA = @($privilegedUserNoMFA).Count
+    $privilegedUsersNoCondition = $privilegedEntitiesDB | Where-Object {$_.policyCondition -like "*noCon*"}
+    $numPrivilegedUsersNoCondition = @($privilegedUsersNoCondition).Count
+    $privielgedUsersNotSecured = $privilegedEntitiesDB | Where-Object {($_.policyCondition -like "*noCon*") -and ($_.MFAenable -eq "NoMFA")}
+    $numPivielgedUsersNotSecured = @($privielgedUsersNotSecured).Count
     $scanTime = Get-Date -Format g
 
     $reportOutputArray.Add("")
@@ -1027,7 +1027,7 @@ function Write-Report {
     if ($numPivielgedUsersNotSecured -gt 1) {
         Write-host "-> Number of unsecured users = no MFA and no constrained permission condition: $numPivielgedUsersNotSecured Users!`n" -BackgroundColor DarkRed
     }
-    $reportOutputArray.Add("")        
+    $reportOutputArray.Add("")
     $reportOutputArray.Add("List of unsecured privileged users:")
     $counter = 0
     $privielgedUsersNotSecured | foreach {
@@ -1047,8 +1047,8 @@ function Write-Report {
     $counter = 0
     $usersFromGroups = @()
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
+        $countPolicyNames = ([string]$_.PolicyName -split ',').Count - 1
+        $countPoliciesFromGroups = @(@([string]$_.PolicyName -split ',') -like '*-Thr*').Count
         if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
             $usersFromGroups += $_.EntityName
         }
@@ -1105,7 +1105,7 @@ function Write-Report {
     $reportOutputArray.Add("")
     $reportOutputArray.Add("#######################################################")
 
-    $reportOutputArray | Out-File $finalReportPath 
+    $reportOutputArray | Out-File $finalReportPath
 }
 
 
@@ -1126,8 +1126,8 @@ function Scan-AWShadowAdmins {
         $DefaultRegion,
         [string]
         $ProfileName
-    )    
-     
+    )
+
     $privilegedEntitiesDB = @{}
     $countEntities = @{}
     [string]$resultsTime = Get-Date -Format "yyyyMMdd"
@@ -1161,7 +1161,7 @@ function Scan-AWShadowAdmins {
     $updatedAwsPowerShellModule = $false
     $versionAwsPowerShellModule = (Get-Module) | Where-Object {$_.Name -eq "AWSPowerShell"} | select Version
     if ($versionAwsPowerShellModule.Version.Major -ge 4) {
-    	$updatedAwsPowerShellModule = $true
+	$updatedAwsPowerShellModule = $true
     }
     else {
         if ($versionAwsPowerShellModule.Version.Major -eq 3){
@@ -1174,16 +1174,16 @@ function Scan-AWShadowAdmins {
     }
     if (-not $updatedAwsPowerShellModule) {
         Write-Host "`nThe current AWS PowerShell Module that is loaded - isn't up to date, its version: "$versionAwsPowerShellModule.Version -BackgroundColor Red
-        Write-Host "Please upgrade your AWS Powershell Module." 
-        Write-Host "If you have PowerShell v5+ -> Use the commands: `"Update-Module -Name AWSPowerShell`" and restart the PowerShell session""" 
-        Write-Host "You can also uninstall and install the updated module with:" 
-        Write-Host "`"Uninstall-Module -Name AWSPowerShell`" and `"Install-Module -Name AWSPowerShell`"" 
-        Write-Host "OR download manualy the last version from:`nhttps://aws.amazon.com/powershell/" 
+        Write-Host "Please upgrade your AWS Powershell Module."
+        Write-Host "If you have PowerShell v5+ -> Use the commands: `"Update-Module -Name AWSPowerShell`" and restart the PowerShell session"""
+        Write-Host "You can also uninstall and install the updated module with:"
+        Write-Host "`"Uninstall-Module -Name AWSPowerShell`" and `"Install-Module -Name AWSPowerShell`""
+        Write-Host "OR download manualy the last version from:`nhttps://aws.amazon.com/powershell/"
         Write-Host "`nThe AWStealth scan will continue!" -BackgroundColor DarkGreen
         Write-Host "But there might be false-postive in the results if the entities in the envrionment have `"Permissions Boundries`"`n" -BackgroundColor DarkGreen
     }
-    
-    $totaltime = New-Object system.Diagnostics.Stopwatch  
+
+    $totaltime = New-Object system.Diagnostics.Stopwatch
     $totaltime.Start()
 
     # analyze managed policies
@@ -1191,7 +1191,7 @@ function Scan-AWShadowAdmins {
 
     # analyze inline policies
     Check-InlinePolicies
-        
+
     $totaltime.Stop()
     $runtime = $totaltime.Elapsed.TotalMilliseconds
     $runtime = ($runtime/1000)
@@ -1204,7 +1204,7 @@ function Scan-AWShadowAdmins {
 
     Write-host "`n[+] Discovered" $privilegedEntitiesDB.Count "privileged entities in the scanned AWS environment" -ForegroundColor green
 
-    if ($($privilegedEntitiesDB | Measure-Object).count -eq 0) {
+    if (@($privilegedEntitiesDB).Count -eq 0) {
         Write-host "Sorry, the scan didn't find any AWS Shadow Admin.`nPlease try again.`nCheck the prerequisites - including the credentials you are using in the scan and your internet connection" -ForegroundColor red
     }
     else {
