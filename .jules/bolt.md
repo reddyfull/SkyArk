@@ -1,0 +1,3 @@
+## 2024-05-14 - PowerShell Measure-Object Pipeline Overhead
+**Learning:** Found significant pipeline overhead using `Where-Object` and `Measure-Object` for simple string occurrences counting in loop blocks of AWStealth.ps1 (`Where-Object {$_ -eq ','} | Measure-Object`). It turns out that `Where-Object` when applied to a single string doesn't filter elements; it evaluates the whole string. Replacing with `.Count` property and split avoids pipeline overhead and bugs.
+**Action:** Replace `... | Measure-Object` pipelines with `.Count` direct property access where suitable, and use string `-split` instead of `Where-Object` when counting string tokens.
