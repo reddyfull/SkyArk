@@ -1,0 +1,3 @@
+## 2024-05-24 - Slow and buggy Pipeline in loops
+**Learning:** Using `Where-Object | Measure-Object` inside loops on custom objects string properties (e.g. `$_.PolicyName | Where-Object {$_ -eq ','}`) instead of arrays leads to O(N^2) bottlenecks and severe logical bugs (as the full string is evaluated as a single item, failing partial matches).
+**Action:** Replace `Measure-Object` pipelines with string casting, the `-split` operator, and direct `.Count` property access. Use array wrapping `@()` with the native PowerShell array operator `-like` (e.g. `@(@([string]$var -split ',') -like 'pattern').Count`) to filter and count elements accurately and ~10x faster safely.
