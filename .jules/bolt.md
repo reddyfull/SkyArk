@@ -1,0 +1,3 @@
+## 2024-05-19 - Removed Measure-Object overhead in AWStealth
+ **Learning:** Using `Measure-Object` and `Where-Object` on arrays or strings causes significant pipeline overhead and in some cases even logical errors. In particular, checking strings for delimiters using `Where-Object` treats the string as one entity, resulting in empty matches and incorrect string logic for `$countPolicyNames`.
+ **Action:** Replaced `Measure-Object` counting with native `.Count` property and replaced `Where-Object` logic for strings with `-split` and `-like` array matching logic to both ensure correctness and drastically improve performance.
