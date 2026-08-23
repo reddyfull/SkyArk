@@ -1,0 +1,3 @@
+## 2024-05-19 - [Performance Optimization] Replace Measure-Object with .Count and use -split for string counting
+**Learning:** In PowerShell, using `Where-Object` on a single string (like `$_.PolicyName | Where-Object {$_ -eq ','}`) evaluates the entire string as one object, which leads to incorrect counts. Furthermore, piping to `Measure-Object` is significantly slower than using native array `-split` and direct `.Count` property access.
+**Action:** Replace `Where-Object` and `Measure-Object` pipelines with `-split` and `.Count` for character counting and array filtering. This not only improves performance but fixes logic bugs where commas or substrings in a single string were incorrectly counted.
