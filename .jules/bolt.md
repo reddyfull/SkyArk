@@ -1,0 +1,3 @@
+## 2024-05-24 - Avoid Pipeline Overhead and Logic Bugs with Pipeline String Evaluation
+**Learning:** In PowerShell, using `Where-Object` on a single string to count characters (`"a,b,c" | Where-Object {$_ -eq ','}`) evaluates the entire string as one object, returning nothing and causing logic bugs. Furthermore, using `Measure-Object` on arrays and scalar values creates severe pipeline overhead compared to native `.Count` evaluation.
+**Action:** Always prefer the `-split` operator and `@().Count` syntax in place of `Where-Object | Measure-Object` for counting and matching substrings or collection sizes to gain large performance wins and avoid single-string pipeline absorption bugs.
