@@ -1,0 +1,7 @@
+💡 What: Replaced `Where-Object | Measure-Object` pipelines on single strings with the `-split` operator and direct property counting in the final report generation block of AWStealth.ps1 (lines 1050-1051).
+
+🎯 Why: The original logic `($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count` had a logic bug because `Where-Object` does not split a single string by default; it evaluates the whole string. When evaluated, it always returned nothing and the pipeline would count zero matches. Furthermore, using a pipeline on strings inside a loop introduces massive pipeline overhead.
+
+📊 Impact: Resolves a logic bug preventing correct group user accumulation logic when writing the report, and provides a significant micro-optimization by avoiding the pipeline completely inside a `foreach` loop.
+
+🔬 Measurement: Run AWStealth, run `pwsh -c 'Get-Command ./AWStealth/AWStealth.ps1'` to verify syntax.
