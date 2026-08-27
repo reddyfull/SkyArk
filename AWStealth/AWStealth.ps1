@@ -952,27 +952,27 @@ function Write-Report {
 
     $reportOutputArray = New-Object System.Collections.Generic.List[System.String]
 
-    $allPrivivlgedEntities = $privilegedEntitiesDB | select "Arn" -Unique
-    $numAllPrivivlgedEntities = $($allPrivivlgedEntities | Measure-Object).count
+    $allPrivivlgedEntities = $privilegedEntitiesDB.Values | select "Arn" -Unique
+    $numAllPrivivlgedEntities = @($allPrivivlgedEntities).Count
     Write-host "-> AWStealth discovered $numAllPrivivlgedEntities privileged entities" -BackgroundColor DarkRed
     $awsAccount = (([string]$allPrivivlgedEntities[0]).Split(":"))[4]
-    $shadowAdmins = $privilegedEntitiesDB | Where-Object {$_.PrivilegeType -like "*shadow*"} 
-    $numShadowAdmins = $($shadowAdmins | Measure-Object).count
+    $shadowAdmins = $privilegedEntitiesDB.Values | Where-Object {$_.PrivilegeType -like "*shadow*"}
+    $numShadowAdmins = @($shadowAdmins).Count
     if ($numShadowAdmins -ge 1) {
          Write-host "-> Discovered $numShadowAdmins AWS Shadow Admins" -BackgroundColor DarkRed
     }
-    $privilegedUsers = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "User"}
-    $numPrivilegedUsers = $($privilegedUsers | Measure-Object).count
-    $privilegedGroups = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Group"}
-    $numPrivilegedGroups = $($privilegedGroups | Measure-Object).count
-    $privilegedRoles = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Role"}
-    $numPivilegedRoles = $($privilegedRoles | Measure-Object).count
-    $privilegedUserNoMFA = $privilegedEntitiesDB | Where-Object {$_.MFAenable -eq "NoMFA"} 
-    $numPrivilegedUserNoMFA = $($privilegedUserNoMFA | Measure-Object).count
-    $privilegedUsersNoCondition = $privilegedEntitiesDB | Where-Object {$_.policyCondition -like "*noCon*"} 
-    $numPrivilegedUsersNoCondition = $($privilegedUsersNoCondition | Measure-Object).count
-    $privielgedUsersNotSecured = $privilegedEntitiesDB | Where-Object {($_.policyCondition -like "*noCon*") -and ($_.MFAenable -eq "NoMFA")} 
-    $numPivielgedUsersNotSecured = $($privielgedUsersNotSecured| Measure-Object).count
+    $privilegedUsers = $privilegedEntitiesDB.Values | Where-Object {$_.EntityType -eq "User"}
+    $numPrivilegedUsers = @($privilegedUsers).Count
+    $privilegedGroups = $privilegedEntitiesDB.Values | Where-Object {$_.EntityType -eq "Group"}
+    $numPrivilegedGroups = @($privilegedGroups).Count
+    $privilegedRoles = $privilegedEntitiesDB.Values | Where-Object {$_.EntityType -eq "Role"}
+    $numPivilegedRoles = @($privilegedRoles).Count
+    $privilegedUserNoMFA = $privilegedEntitiesDB.Values | Where-Object {$_.MFAenable -eq "NoMFA"}
+    $numPrivilegedUserNoMFA = @($privilegedUserNoMFA).Count
+    $privilegedUsersNoCondition = $privilegedEntitiesDB.Values | Where-Object {$_.policyCondition -like "*noCon*"}
+    $numPrivilegedUsersNoCondition = @($privilegedUsersNoCondition).Count
+    $privielgedUsersNotSecured = $privilegedEntitiesDB.Values | Where-Object {($_.policyCondition -like "*noCon*") -and ($_.MFAenable -eq "NoMFA")}
+    $numPivielgedUsersNotSecured = @($privielgedUsersNotSecured).Count
     $scanTime = Get-Date -Format g
 
     $reportOutputArray.Add("")
@@ -1045,12 +1045,13 @@ function Write-Report {
     $reportOutputArray.Add("")
     $reportOutputArray.Add("List of users with direct privileges:")
     $counter = 0
-    $usersFromGroups = @()
+    $usersFromGroups = New-Object System.Collections.Generic.List[System.String]
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
-        if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
-            $usersFromGroups += $_.EntityName
+        $policies = [string]$_.PolicyName -split ','
+        $countPolicyNames = $policies.Count
+        $countPoliciesFromGroups = @($policies -like '*-Thr*').Count
+        if ($countPolicyNames -eq $countPoliciesFromGroups -and $countPolicyNames -gt 0) {
+            $usersFromGroups.Add($_.EntityName)
         }
         else {
             $counter += 1
