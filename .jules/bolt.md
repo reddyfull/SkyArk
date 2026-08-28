@@ -1,0 +1,3 @@
+## 2024-05-18 - [Optimize Where-Object Measure-Object pattern]
+**Learning:** In PowerShell, using `Where-Object {$_ -eq ','} | Measure-Object` to count delimiter occurrences in strings is extremely slow due to pipeline overhead and sometimes buggy (if treating string as single object). Converting `[string]$var -split ','` and counting elements directly avoids the pipeline entirely, leading to massive speedups (from ~750ms to ~35ms for 1000 iterations).
+**Action:** Replace `Where-Object` and `Measure-Object` pipelines with native array operations (`-split`, `-like`) wrapped in `@(...)` to count occurrences safely and significantly improve performance.
