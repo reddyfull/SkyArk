@@ -1,0 +1,3 @@
+## 2024-05-30 - Fixing String Filtering Logic Bug & Performance Optimization
+**Learning:** Piping strings directly to `Where-Object` with a character match or substring match (like `$_ -eq ','`) treats the entire string as one object, causing logic bugs because it doesn't split the string or match inner characters correctly, yielding 0 counts. Using string splitting with native array filtering operators avoids overhead and fixes the logic bug entirely.
+**Action:** Replace `Where-Object` pipelines used for counting substrings within strings with `-split` operators combined with `.Count`, removing the slow pipeline overhead and correcting the logic.
