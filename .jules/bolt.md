@@ -1,0 +1,3 @@
+## 2024-09-03 - [Array Concatenation Optimization in PowerShell]
+**Learning:** Using the `+=` operator to append items to an array in a loop in PowerShell creates a new array object in memory and copies all existing items for every iteration. This results in severe O(N^2) performance degradation, especially for large datasets.
+**Action:** Instead of initializing an empty array and using `+=` inside a `foreach` loop, capture the output of the entire pipeline directly into a variable using direct pipeline assignment (`$array = $collection | foreach { ... }`) or use `System.Collections.Generic.List[T]` and its `.Add()` method.
