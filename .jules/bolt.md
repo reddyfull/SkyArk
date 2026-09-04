@@ -1,0 +1,3 @@
+## 2024-09-04 - Optimize Collection Counting & Fix Logic Bugs
+**Learning:** Using `Where-Object` on a single string (e.g. `"a,b,c" | Where-Object {$_ -eq ','}`) evaluates the entire string as a single object, returning nothing and causing logic bugs. Piping arrays/collections to `Measure-Object` incurs pipeline overhead and is slower than native `.Count` property access on arrays.
+**Action:** Use native string split operators (e.g. `([string]$var -split ',').Count - 1`) to correctly count substrings without pipeline overhead. For general element counting, force evaluation into an array and use `.Count` directly (`@(@($var)).Count` or `$var.Count`).
