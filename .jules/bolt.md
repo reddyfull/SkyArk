@@ -1,0 +1,3 @@
+## 2024-05-24 - [Fix Where-Object Logic Bug and Pipeline Overhead]
+**Learning:** Using `Where-Object` on a single string to count characters (e.g., `"a,b,c" | Where-Object {$_ -eq ','}`) evaluates the entire string as a single object and returns nothing, leading to logic bugs. The script intended to count commas to determine the number of policies in a comma-separated string, but it was returning 0.
+**Action:** Replace `Where-Object` pipeline with `-split` operator and array filtering (e.g. `([string]$_.PolicyName -split ',').Count - 1` and `@([string]$_.PolicyName -split ',' -like '*-Thr*').Count`). This not only fixes the logic bug but is also significantly faster by avoiding pipeline overhead.
