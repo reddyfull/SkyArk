@@ -1,0 +1,4 @@
+💡 What: Replaced slow `Where-Object | Measure-Object` pipelines with native `-split` and `.Count` array wrapping in `AWStealth.ps1`.
+🎯 Why: Piping objects (especially strings) into `Measure-Object` inside loops introduces significant execution overhead in PowerShell.
+📊 Impact: Considerably faster execution of the script in iterative processing loops, preventing pipeline allocation overhead and fixing logical bugs related to string evaluation.
+🔬 Measurement: Verify script logic output via `pwsh -c 'Get-Command ./AWStealth/AWStealth.ps1 -ErrorAction Stop'` and run a scan to observe the speed boost.
