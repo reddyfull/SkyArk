@@ -1,0 +1,3 @@
+## 2024-09-08 - [PowerShell Pipeline Overhead and Array Filtering]
+**Learning:** Using `Where-Object` on a single string (e.g. `$string | Where-Object {$_ -eq ','}`) evaluates the entire string as a single object, returning nothing and causing logic bugs. Also, pipelining directly to `Measure-Object` introduces severe pipeline overhead.
+**Action:** Replace `Where-Object | Measure-Object` string filtering with the `-split` operator (e.g. `([string]$var -split ',').Count - 1`). For array elements, use `@(...).Count` or natively filter arrays via `@(@($var) -like 'pattern').Count` to skip the pipeline completely, yielding drastic performance benefits in iterative processing.
