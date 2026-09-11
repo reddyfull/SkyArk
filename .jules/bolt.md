@@ -1,0 +1,3 @@
+## 2024-09-11 - [Optimize String Splitting and Where-Object pipeline]
+**Learning:** In PowerShell, counting characters or split elements using `Where-Object` on a single string creates a logic bug and heavy pipeline overhead. `Where-Object` evaluates a string as a single object, resulting in empty returns or incorrect counts when counting commas (e.g. `$_.PolicyName | Where-Object {$_ -eq ','}`). Also using `Measure-Object` for simple array counting is slow compared to `.Count`.
+**Action:** Replaced `Where-Object` and `Measure-Object` with `[string]$var -split ','` for counting delimiters and `@(... -like '*-Thr*').Count` for array filtering to improve speed and correctly capture logic intent without raising `$null` runtime exceptions.
