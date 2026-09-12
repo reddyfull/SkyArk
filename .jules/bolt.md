@@ -1,0 +1,3 @@
+## 2024-05-24 - [Remove Measure-Object pipeline overhead]
+**Learning:** Using `Measure-Object` in pipelines (e.g. `$var | Measure-Object`) adds significant pipeline overhead and can cause logic bugs, such as counting an empty hashtable or array as 1. Filtering single strings with `Where-Object` returns null instead of evaluating properly.
+**Action:** Use `.Count` directly on arrays/collections. When needing to filter elements or strings safely for counting without pipeline overhead, cast to array and use native operators like `@(@($var) -like 'pattern').Count` or split strings directly with `-split`.
