@@ -1,0 +1,3 @@
+## 2024-05-23 - [Optimized Policy Checking Logic in AWStealth.ps1]
+**Learning:** In PowerShell, using `Where-Object` on a single string (like `$_.PolicyName`) evaluates the string as a whole, meaning `Where-Object {$_ -eq ,}` will never match unless the entire string is just a comma. Also `Measure-Object` carries significant pipeline overhead. This causes logic errors and performance bottlenecks.
+**Action:** Replace `Where-Object` pipeline chains on strings with `-split` operators (e.g., `([string]$_.PolicyName -split ",").Count - 1` to count commas) and array `-like` matches (e.g., `@(@([string]$_.PolicyName -split ",") -like "*-Thr*").Count`) to ensure correct logic and better performance without pipeline overhead.
