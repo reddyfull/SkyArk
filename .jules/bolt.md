@@ -1,0 +1,3 @@
+## 2024-09-16 - [Performance Optimization] Eliminate Measure-Object Overhead in PowerShell Scripts
+**Learning:** In PowerShell 3.0+, using `Measure-Object` for simply counting items in collections or strings introduces significant pipeline overhead and can lead to logic bugs (e.g., measuring an empty collection might return an unexpected count, and strings behave differently than arrays).
+**Action:** Replace `| Measure-Object` pipelines with direct array property access (e.g., `@(@($var) -match 'pattern').Count`) for collections, or use the `-split` operator to count delimiters in strings (e.g., `($string -split ',').Count - 1`). Avoid using `.Split()` due to potential null exceptions, and force arrays with `@()` to handle scalars and nulls gracefully.

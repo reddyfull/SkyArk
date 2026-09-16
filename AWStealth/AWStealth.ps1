@@ -367,7 +367,7 @@ function Check-PrivilegedPolicy {
                     # aws ec2 associate-iam-instance-profile --instance-id i-003116a190790073d --iam-instance-profile Name=shadowProfile 
                     $permissionActions = $_.Action | ? {($_ -eq "iam:CreateInstanceProfile") -or ($_ -eq "iam:AddRoleToInstanceProfile") -or ($_ -eq "iam:PassRole") -or ($_ -eq "ec2:AssociateIamInstanceProfile")}
                     $permissionResources = $_.Resource | ? {($_ -eq "*") -or ($_ -eq "arn:aws:iam::*:role/*") -or ($_ -eq "arn:aws:iam::*:instance-profile/*") -or ($_ -eq "arn:aws:ec2:*:*:instance/*")}
-                    if (($($permissionResources | Measure-Object).count -ge 1) -and ($permissionActions.count -ge 3)) {
+                    if ((@($permissionResources).Count -ge 1) -and ($permissionActions.count -ge 3)) {
                         $isPrivileged, $privilegeType = Mark-privilegedPolicy -privilegeType $privilegeType -newPrivilegeType "ShadowModifyInstanceProfiles"
                     }
                     #############################################################################################################################################################(11)
@@ -769,7 +769,7 @@ function Check-InlinePolicies {
         $userName = $_.UserName
         $inlineUserPolicy = Get-IAMUserPolicyList -UserName $userName
         if ($inlineUserPolicy) {
-            $inlineUserPoliciesCounter += $($inlineUserPolicy| Measure-Object).count
+            $inlineUserPoliciesCounter += @($inlineUserPolicy).Count
             $inlineUserPolicy | foreach {
                 $inlineUserPolicyData = Get-IAMUserPolicy -UserName $userName -PolicyName $_
                 $inlineUserPolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineUserPolicyData.PolicyDocument)
@@ -890,7 +890,7 @@ function Check-InlinePolicies {
         $roleName = $_.RoleName
         $inlineRolePolicy = Get-IAMRolePolicyList -RoleName $roleName
         if ($inlineRolePolicy) {
-            $inlineRolePoliciesCounter += $($inlineRolePoliciesCounter | Measure-Object).count
+            $inlineRolePoliciesCounter += @($inlineRolePolicy).Count
             $inlineRolePolicy | foreach {
                 $inlineRolePolicyData = Get-IAMRolePolicy  -RoleName $roleName -PolicyName $_ 
                 $inlineRolePolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineRolePolicyData.PolicyDocument)
