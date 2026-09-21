@@ -1,0 +1,3 @@
+## 2024-05-24 - [Optimize PowerShell String Pipeline overhead]
+**Learning:** Using `Where-Object` combined with `Measure-Object` on a single string to count characters or patterns evaluates the entire string as a single object, leading to slow pipeline processing overhead and sometimes returning empty results (logic bugs).
+**Action:** Replace `Where-Object | Measure-Object` pipelines on strings with the `-split` operator and native array count property (e.g., `([string]$var -split ',').Count - 1` and `@(@([string]$var -split ',') -like 'pattern').Count`) to drastically improve string token counting performance and ensure correct array-like semantics.
