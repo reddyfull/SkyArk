@@ -1047,8 +1047,10 @@ function Write-Report {
     $counter = 0
     $usersFromGroups = @()
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
+        # Bolt: Optimized pipeline overhead (Where-Object | Measure-Object) by replacing it with -split operator and array properties.
+        # This fix dramatically improves enumeration speed and resolves a logic bug where string pipelines evaluate as single items.
+        $countPolicyNames = ([string]$_.PolicyName -split ',').Count - 1
+        $countPoliciesFromGroups = @(@([string]$_.PolicyName -split ',') -like '*-Thr*').Count
         if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
             $usersFromGroups += $_.EntityName
         }
