@@ -1,0 +1,3 @@
+## 2024-05-17 - [Optimized string splitting and counting in AWStealth]
+**Learning:** Using `Where-Object` on a single string to count characters (e.g., `$_ -eq ','`) evaluates the entire string as a single object and returns nothing, leading to logic bugs. Also, using pipeline operators like `Where-Object` and `Measure-Object` on strings causes severe pipeline overhead.
+**Action:** Use the `-split` operator (e.g., `([string]$var -split ',').Count - 1`) to correctly and efficiently identify and count occurrences of a delimiter within a string without pipeline overhead and safely handling `$null` values.
