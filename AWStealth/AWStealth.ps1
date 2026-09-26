@@ -769,7 +769,8 @@ function Check-InlinePolicies {
         $userName = $_.UserName
         $inlineUserPolicy = Get-IAMUserPolicyList -UserName $userName
         if ($inlineUserPolicy) {
-            $inlineUserPoliciesCounter += $($inlineUserPolicy| Measure-Object).count
+            # Bolt Perf: Use array wrapper @() instead of Measure-Object to avoid pipeline overhead
+            $inlineUserPoliciesCounter += @($inlineUserPolicy).Count
             $inlineUserPolicy | foreach {
                 $inlineUserPolicyData = Get-IAMUserPolicy -UserName $userName -PolicyName $_
                 $inlineUserPolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineUserPolicyData.PolicyDocument)
@@ -820,7 +821,8 @@ function Check-InlinePolicies {
         # Get a list of the inline policies that are embedded in the specified group.
         $inlineGroupPolicy = Get-IAMGroupPolicyList -GroupName $GroupName 
         if ($inlineGroupPolicy) {
-            $inlineGroupPoliciesCounter += $($inlineGroupPolicy | Measure-Object).count
+            # Bolt Perf: Use array wrapper @() instead of Measure-Object to avoid pipeline overhead
+            $inlineGroupPoliciesCounter += @($inlineGroupPolicy).Count
             $inlineGroupPolicy | foreach {
                 $inlineGroupPolicyData = Get-IAMGroupPolicy -GroupName $GroupName -PolicyName $_ 
                 $inlineGroupPolicyStr = [System.Web.HttpUtility]::UrlDecode($inlineGroupPolicyData.PolicyDocument)
@@ -953,26 +955,26 @@ function Write-Report {
     $reportOutputArray = New-Object System.Collections.Generic.List[System.String]
 
     $allPrivivlgedEntities = $privilegedEntitiesDB | select "Arn" -Unique
-    $numAllPrivivlgedEntities = $($allPrivivlgedEntities | Measure-Object).count
+    $numAllPrivivlgedEntities = @(@($allPrivivlgedEntities)).Count
     Write-host "-> AWStealth discovered $numAllPrivivlgedEntities privileged entities" -BackgroundColor DarkRed
     $awsAccount = (([string]$allPrivivlgedEntities[0]).Split(":"))[4]
     $shadowAdmins = $privilegedEntitiesDB | Where-Object {$_.PrivilegeType -like "*shadow*"} 
-    $numShadowAdmins = $($shadowAdmins | Measure-Object).count
+    $numShadowAdmins = @(@($shadowAdmins)).Count
     if ($numShadowAdmins -ge 1) {
          Write-host "-> Discovered $numShadowAdmins AWS Shadow Admins" -BackgroundColor DarkRed
     }
     $privilegedUsers = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "User"}
-    $numPrivilegedUsers = $($privilegedUsers | Measure-Object).count
+    $numPrivilegedUsers = @(@($privilegedUsers)).Count
     $privilegedGroups = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Group"}
-    $numPrivilegedGroups = $($privilegedGroups | Measure-Object).count
+    $numPrivilegedGroups = @(@($privilegedGroups)).Count
     $privilegedRoles = $privilegedEntitiesDB | Where-Object {$_.EntityType -eq "Role"}
-    $numPivilegedRoles = $($privilegedRoles | Measure-Object).count
+    $numPivilegedRoles = @(@($privilegedRoles)).Count
     $privilegedUserNoMFA = $privilegedEntitiesDB | Where-Object {$_.MFAenable -eq "NoMFA"} 
-    $numPrivilegedUserNoMFA = $($privilegedUserNoMFA | Measure-Object).count
+    $numPrivilegedUserNoMFA = @(@($privilegedUserNoMFA)).Count
     $privilegedUsersNoCondition = $privilegedEntitiesDB | Where-Object {$_.policyCondition -like "*noCon*"} 
-    $numPrivilegedUsersNoCondition = $($privilegedUsersNoCondition | Measure-Object).count
+    $numPrivilegedUsersNoCondition = @(@($privilegedUsersNoCondition)).Count
     $privielgedUsersNotSecured = $privilegedEntitiesDB | Where-Object {($_.policyCondition -like "*noCon*") -and ($_.MFAenable -eq "NoMFA")} 
-    $numPivielgedUsersNotSecured = $($privielgedUsersNotSecured| Measure-Object).count
+    $numPivielgedUsersNotSecured = @(@($privielgedUsersNotSecured)).Count
     $scanTime = Get-Date -Format g
 
     $reportOutputArray.Add("")
