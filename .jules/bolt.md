@@ -1,0 +1,3 @@
+## 2024-09-27 - [Optimize array appends and pipeline usage in PowerShell scripts]
+**Learning:** Pipeline operations like `Measure-Object` add significant overhead compared to direct `.Count` property access. When appending elements, `$array += $element` creates a new array each time ($O(N^2)$), causing significant slowdowns. Initializing `System.Collections.Generic.List[T]` and using `.Add()` avoids this overhead ($O(N)$). Also `.Values | Where-Object` correctly filters HashTable values instead of testing the underlying dictionary map.
+**Action:** Always prefer direct `.Count` or `.Add()` methods to loop pipelines and replace `+=` array appends for lists. Apply `.Values` explicitly when filtering Hashtables.
