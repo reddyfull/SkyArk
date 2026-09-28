@@ -1,0 +1,3 @@
+## 2024-05-23 - Pipeline Overhead and String Filtering Logic Bugs in PowerShell
+**Learning:** Using `Where-Object` on a single string intended as a comma-separated list doesn't split the string; it evaluates it as a 1-item array. This not only causes severe pipeline overhead but also leads to silent logic bugs (e.g., counting commas returns 0, counting wildcard matches returns 1 for the whole string).
+**Action:** Always use the `-split` operator to split strings into arrays safely (which natively handles nulls), and use native array operators (like `-like`) combined with `.Count` for O(1) matching and counting without pipeline overhead.
