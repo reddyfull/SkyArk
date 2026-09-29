@@ -1,0 +1,3 @@
+## 2024-05-24 - [Fix Where-Object Logic Bug and Remove Pipeline Overhead]
+**Learning:** In PowerShell, using `Where-Object {$_ -eq ','}` on a single string variable treats the string as a single object and evaluates it to `$false`, which returns nothing when piped to `Measure-Object`. Additionally, using `Where-Object` in large loops introduces significant pipeline overhead.
+**Action:** Replace `Where-Object {$_ -eq ','} | Measure-Object` with `([string]$var -split ',').Count - 1` to correctly count occurrences and avoid pipeline overhead. Replace `Where-Object {$_ -like '*-Thr*'} | Measure-Object` with `@(@([string]$var -split ',') -match '-Thr').Count` for array match filtering.
