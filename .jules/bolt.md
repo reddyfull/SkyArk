@@ -1,0 +1,3 @@
+## 2024-10-01 - Fix Logic Bug and Performance in String Counting
+**Learning:** Using `Where-Object` on a single string (e.g., `"a,b,c" | Where-Object {$_ -eq ','}`) evaluates the entire string as a single object, returning 0, which causes logic bugs when trying to count occurrences. Furthermore, using `Where-Object -like` on a comma-separated string returns 1 regardless of how many times the pattern appears.
+**Action:** Use the `-split` operator (e.g., `([string]$var -split ',').Count - 1`) to correctly identify and count occurrences of a delimiter within a string. Use array wrapping with the `-like` operator (e.g., `@(@([string]$var -split ',') -like 'pattern').Count`) to count specific patterns accurately and improve performance by avoiding pipeline overhead.
