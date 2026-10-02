@@ -1,0 +1,3 @@
+## 2026-10-02 - [Remove Measure-Object for Array Operations]
+**Learning:** In PowerShell, counting array items or substring occurrences using | Measure-Object incurs a massive pipeline penalty. Furthermore, filtering strings natively with Where-Object (treating them like arrays) returns nothing, which previously forced the script to evaluate strings incorrectly.
+**Action:** Replace | Measure-Object with direct .Count property access on variables or subexpressions, e.g., @($var).Count. For string matching instead of pipeline evaluation, use the -split operator or array-cast filtering, e.g., @([string]$string -split ',' -like '*-Thr*').Count.
