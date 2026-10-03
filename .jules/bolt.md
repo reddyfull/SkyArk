@@ -1,0 +1,3 @@
+## 2024-05-18 - String pipeline parsing vs -split operator
+**Learning:** Using `Where-Object` on a single string (e.g., `"a,b,c" | Where-Object {$_ -eq ','}`) evaluates the entire string as a single object, returning 0/nothing, which leads to logic bugs and slow performance.
+**Action:** Always use the `-split` operator (e.g., `([string]$var -split ',').Count - 1`) to correctly identify and count occurrences of a delimiter within a string without pipeline overhead.
