@@ -1,0 +1,3 @@
+## 2024-05-18 - String Parsing Logic Bug vs Pipeline Cost
+**Learning:** Attempting to count delimiters in a string using `($string | Where-Object {$_ -eq ','} | Measure-Object).Count` evaluates the entire string as a single pipeline object. It returns 0 instead of the expected count, breaking the logic that calculates whether a user's privileges come exclusively from groups.
+**Action:** Always use the `-split` operator (`($string -split ',').Count - 1`) to correctly evaluate and count substrings within a string. This not only fixes the logic bug but dramatically improves performance by removing pipeline allocation overhead.
