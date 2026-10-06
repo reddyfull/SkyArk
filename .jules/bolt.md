@@ -1,0 +1,3 @@
+## 2024-05-24 - [Avoid Pipeline Overhead in PowerShell String Evaluation]
+ **Learning:** [Using Where-Object and Measure-Object for simple element counting or pattern matching on strings/scalars introduces severe pipeline overhead (10-15x slower). Additionally, pipelining a single string evaluates the entire string as a single object, which can cause confusion if string splitting was intended.]
+ **Action:** [To safely remove pipeline overhead while preserving exact original behavior (array item filtering semantics), force the operand into an array and use PowerShell's native array filtering operators like @(@($var) -eq ',').Count. This provides O(1) performance without the pipeline cost and handles nulls safely.]
