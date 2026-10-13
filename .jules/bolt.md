@@ -1,0 +1,3 @@
+## 2024-11-20 - [Pipeline Overhead in String Operations]
+**Learning:** [Using Where-Object and Measure-Object over strings treats the string as a single object which evaluates correctly but induces significant pipeline overhead. Native array casts using @() and the -eq/-like operators are much faster and safer, circumventing the pipeline completely while correctly processing the values while strictly preserving the scalar evaluation semantics.]
+**Action:** [When needing to count specific scalar strings, leverage native array casts and properties (@(...).Count) instead of the pipeline to significantly optimize processing time inside loops.]
