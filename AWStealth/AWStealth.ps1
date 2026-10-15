@@ -1045,12 +1045,14 @@ function Write-Report {
     $reportOutputArray.Add("")
     $reportOutputArray.Add("List of users with direct privileges:")
     $counter = 0
-    $usersFromGroups = @()
+    # ⚡ Bolt optimization: Use List[T] instead of O(N^2) array concatenation
+    $usersFromGroups = New-Object System.Collections.Generic.List[System.String]
     $privilegedUsers | foreach {
-        $countPolicyNames = ($_.PolicyName | Where-Object {$_ -eq ','} | Measure-Object).Count
-        $countPoliciesFromGroups = ($_.PolicyName | Where-Object {$_ -like '*-Thr*'} | Measure-Object).Count
+        # ⚡ Bolt optimization: Avoid Where-Object/Measure-Object pipeline overhead by wrapping with array cast and using native Count
+        $countPolicyNames = @(@($_.PolicyName) -eq ',').Count
+        $countPoliciesFromGroups = @(@($_.PolicyName) -like '*-Thr*').Count
         if (($countPolicyNames + 1) -eq $countPoliciesFromGroups) {
-            $usersFromGroups += $_.EntityName
+            $usersFromGroups.Add($_.EntityName)
         }
         else {
             $counter += 1
