@@ -1,0 +1,3 @@
+## 2024-05-14 - PowerShell Pipeline Performance Overhead
+**Learning:** In PowerShell, using the `Where-Object` and `Measure-Object` pipeline (e.g. `$array | Where-Object {...} | Measure-Object`) for counting elements incurs a significant performance penalty (O(N) with high constant factor overhead for pipeline setup/teardown and object wrapping).
+**Action:** Replaced pipeline filters with the `.Where()` method for custom object arrays (e.g. `$dbValues.Where({...})`) and replaced `| Measure-Object` with native array property access (e.g. `@($array).Count`). For scalar/string character filtering that behaves like an array, use the native array comparison `@(@($str) -eq ',').Count`. This drastically improves performance.
