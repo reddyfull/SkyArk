@@ -659,7 +659,8 @@ function Write-AzureReconInfo {
     }
     $ofs = ','
 
-    $entityReconOutput = @()
+    # ⚡ Bolt optimization: Used List[T] instead of array += for O(N) generation of user recon output
+    $entityReconOutput = New-Object System.Collections.Generic.List[PSObject]
 
     $entityDict.Values | foreach {
         $entityReconLine = [PSCustomObject][ordered] @{
@@ -702,11 +703,12 @@ function Write-AzureReconInfo {
                 DeletionTimestamp          = [string]$_.DeletionTimestamp
                 ObjectId                   = [string]$_.ObjectId
         }       
-        $entityReconOutput += $entityReconLine
+        $entityReconOutput.Add($entityReconLine)
     }
     $entityReconOutput | Sort-Object UserPrincipalName | Export-Csv -path $usersInfoPath -NoTypeInformation
 
-    $tenantReconOutput = @()
+    # ⚡ Bolt optimization: Used List[T] instead of array += for O(N) generation of tenant recon output
+    $tenantReconOutput = New-Object System.Collections.Generic.List[PSObject]
     $tenantDict.Values | foreach {
         $tenantReconLine = [PSCustomObject][ordered] @{
                 InitialDomainName      = [string]$_.InitialDomainName
@@ -732,7 +734,7 @@ function Write-AzureReconInfo {
                 DeletionTimestamp      = [string]$_.DeletionTimestamp
                 ObjectId               = [string]$_.ObjectId
         }       
-        $tenantReconOutput += $tenantReconLine
+        $tenantReconOutput.Add($tenantReconLine)
     }
     $tenantReconOutput | Sort-Object InitialDomainName | Export-Csv -path $directoryInfoPath -NoTypeInformation
 }
@@ -764,8 +766,9 @@ function Write-AzureStealthResults {
         Write-Host "`n  [+] Completed the scan, the AzureStealth results should be presented in a new  window"
         Write-Host "`n      To get the results files - go to the results folder - in the following location:`n      `"$resultsFolder`""
         # In addition, present the results in an automated gridview using Out-GridView
-        $resultsForGridView = @()
-        $azureAdminsResults | foreach {$resultsForGridView += $_}
+        # ⚡ Bolt optimization: Used List[T] instead of array += for O(N) performance on large datasets
+        $resultsForGridView = New-Object System.Collections.Generic.List[PSObject]
+        $azureAdminsResults | foreach {$resultsForGridView.Add($_)}
         $resultsForGridView | Out-GridView -Title "AzureStealth Results"
     }
     else {
