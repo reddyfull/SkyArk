@@ -1,0 +1,3 @@
+## 2024-10-19 - Avoid Measure-Object pipeline overhead
+**Learning:** Using `| Measure-Object` for simple array length measurements causes high pipeline overhead in PowerShell, slowing down execution significantly. Additionally, piping `Where-Object` directly into `Measure-Object` on scalars/nulls causes similar overhead and unexpected behaviors.
+**Action:** Use native array wrappers like `@(var).Count` and `@(@(var) -eq 'val').Count` which drastically reduce this pipeline overhead while safely preserving scalar and null semantics.
