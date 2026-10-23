@@ -1,0 +1,3 @@
+## 2024-10-23 - Optimize PowerShell Array Pipeline Overhead
+**Learning:** Using `| Measure-Object` to count items in PowerShell incurs significant pipeline overhead, especially inside loops like those in `Check-InlinePolicies` or `Write-Report`. Wrapping a variable in an array cast and accessing the `.Count` property (e.g. `@($var).Count`) achieves the exact same functionality (safely handling `$null`, scalars, and arrays) but operates significantly faster due to the absence of pipeline processing.
+**Action:** Always prefer native array casts with `.Count` over `| Measure-Object` for simple item counting when refactoring or writing new PowerShell scripts to improve execution performance.
