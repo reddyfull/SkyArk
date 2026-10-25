@@ -659,10 +659,9 @@ function Write-AzureReconInfo {
     }
     $ofs = ','
 
-    $entityReconOutput = @()
-
-    $entityDict.Values | foreach {
-        $entityReconLine = [PSCustomObject][ordered] @{
+    # ⚡ Bolt optimization: Prevent O(N^2) reallocation by using direct pipeline assignment instead of +=
+    $entityReconOutput = $entityDict.Values | foreach {
+        [PSCustomObject][ordered] @{
                 UserPrincipalName          = [string]$_.UserPrincipalName
                 DisplayName                = [string]$_.DisplayName
                 ObjectType                 = [string]$_.ObjectType
@@ -702,13 +701,12 @@ function Write-AzureReconInfo {
                 DeletionTimestamp          = [string]$_.DeletionTimestamp
                 ObjectId                   = [string]$_.ObjectId
         }       
-        $entityReconOutput += $entityReconLine
     }
     $entityReconOutput | Sort-Object UserPrincipalName | Export-Csv -path $usersInfoPath -NoTypeInformation
 
-    $tenantReconOutput = @()
-    $tenantDict.Values | foreach {
-        $tenantReconLine = [PSCustomObject][ordered] @{
+    # ⚡ Bolt optimization: Prevent O(N^2) reallocation by using direct pipeline assignment instead of +=
+    $tenantReconOutput = $tenantDict.Values | foreach {
+        [PSCustomObject][ordered] @{
                 InitialDomainName      = [string]$_.InitialDomainName
                 DisplayName            = [string]$_.DisplayName
                 ObjectType             = [string]$_.ObjectType
@@ -732,7 +730,6 @@ function Write-AzureReconInfo {
                 DeletionTimestamp      = [string]$_.DeletionTimestamp
                 ObjectId               = [string]$_.ObjectId
         }       
-        $tenantReconOutput += $tenantReconLine
     }
     $tenantReconOutput | Sort-Object InitialDomainName | Export-Csv -path $directoryInfoPath -NoTypeInformation
 }
@@ -764,8 +761,8 @@ function Write-AzureStealthResults {
         Write-Host "`n  [+] Completed the scan, the AzureStealth results should be presented in a new  window"
         Write-Host "`n      To get the results files - go to the results folder - in the following location:`n      `"$resultsFolder`""
         # In addition, present the results in an automated gridview using Out-GridView
-        $resultsForGridView = @()
-        $azureAdminsResults | foreach {$resultsForGridView += $_}
+        # ⚡ Bolt optimization: Avoid O(N^2) reallocation by casting directly instead of looping with +=
+        $resultsForGridView = @($azureAdminsResults)
         $resultsForGridView | Out-GridView -Title "AzureStealth Results"
     }
     else {
