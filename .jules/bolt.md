@@ -1,0 +1,3 @@
+## 2024-05-24 - Optimizing Where-Object | Measure-Object with Array Casting
+**Learning:** In PowerShell, using `Where-Object { ... } | Measure-Object` for simple filtering and counting is a major performance bottleneck due to pipeline overhead, particularly in loops. Replacing it with native array casting and operators (e.g., `@(@($var) -eq ',').Count`) drastically reduces execution time (from ~2400ms to ~30ms for 10000 iterations) while safely preserving scalar and array semantics.
+**Action:** Always prefer native array casting filtering over `Where-Object | Measure-Object` when counting primitives or strings to eliminate pipeline overhead safely.
