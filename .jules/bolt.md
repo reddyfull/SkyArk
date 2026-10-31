@@ -1,0 +1,3 @@
+## 2024-05-19 - Replacing Measure-Object with Native Array Counts
+**Learning:** PowerShell's pipeline overhead when using `Measure-Object` and `Where-Object` on scalars/arrays is substantial. While doing optimizations, directly casting variables as arrays `@()` and using `.Count` provides a safe, drop-in replacement that avoids the pipeline cost while appropriately handling nulls (returning 0) and preserving logic semantics in older PowerShell versions (3.0+).
+**Action:** When attempting to improve loop and logic execution speed, replace `$($var | Measure-Object).Count` with `@($var).Count` instead of making architectural shifts. If array filtering is used, use native array casting like `@(@($var) -eq 'val').Count`.
