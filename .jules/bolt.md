@@ -1,0 +1,3 @@
+## 2024-11-02 - [AWStealth Performance: Optimized measure-object pipelines]
+**Learning:** Found multiple usages of `Where-Object { ... } | Measure-Object` and `Measure-Object` for simple array element counting. Pipelining these collections has significant O(n) runtime overhead. Direct native array operators `@($array).Count` and `@(@($array) -eq 'val').Count` perform significantly better, handle `$null` types natively, and avoids allocating temporary Measure-Object instances in the pipeline.
+**Action:** Replace `| Measure-Object` with native array count constructs `@().Count` to eliminate pipeline creation overhead for item counts. Always check for other usage of `Measure-Object` across the scripts.
