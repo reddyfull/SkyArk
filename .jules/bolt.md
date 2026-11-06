@@ -1,0 +1,3 @@
+## 2026-11-06 - Replace O(N^2) Array Accumulation and Measure-Object Overheads
+**Learning:** Discovered a severe performance bottleneck specific to this codebase's architecture where large AWS/Azure environments cause O(N^2) allocations due to PowerShell's `+=` array operator. Additionally, heavy reliance on `| Measure-Object` and `| Where-Object` pipeline overhead caused massive slowdowns, which can be safely circumvented using native array properties like `@($var).Count` and `@(@($var) -eq 'val').Count`.
+**Action:** When building collections in loops, use `New-Object System.Collections.Generic.List[T]` and `.Add()` instead of `@()` and `+=`. To avoid pipeline overhead, natively wrap outputs and access their `.Count` property.
