@@ -1,0 +1,3 @@
+## 2024-05-13 - [PowerShell Array Count Optimization]
+**Learning:** In PowerShell, using `Where-Object` with `Measure-Object` on arrays (or strings being treated as arrays) is computationally expensive due to pipeline overhead. Replacing `Where-Object | Measure-Object` with native array casts and comparison operators (e.g., `@(@($var) -eq ',').Count`) significantly speeds up counting logic, safely handles scalars and nulls, and avoids pipeline performance bottlenecks.
+**Action:** Always prefer native array casts and comparison operators over `Where-Object | Measure-Object` for simple element counting.
