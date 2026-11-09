@@ -1,0 +1,3 @@
+## 2024-11-09 - Pipeline Overhead vs Native Array Filtering
+**Learning:** In PowerShell, using `Where-Object | Measure-Object` pipelines on strings or arrays inside loops introduces severe performance overhead. Additionally, evaluating strings with pipeline filtering (e.g., `"a,b,c" | Where-Object {$_ -eq ','}`) evaluates the entire string as a single object (returning 0).
+**Action:** Replace `Where-Object | Measure-Object` pipelines with native array filtering operators wrapped in arrays (e.g., `@(@($var) -eq ',').Count` or `@(@($var) -like '*-Thr*').Count`). This securely removes pipeline overhead while strictly preserving scalar/array evaluation semantics and boosting speed significantly.
