@@ -1,0 +1,3 @@
+## 2025-02-20 - [PowerShell Pipeline & Array Optimization]
+**Learning:** PowerShell's pipeline operators like `Where-Object` and `Measure-Object` incur significant overhead, especially in loops. In addition, using `+=` on fixed-size arrays inside loops results in O(N^2) memory reallocation bottlenecks.
+**Action:** When performing element counting and filtering, prefer native array wrapping like `@(@($var) -eq 'match').Count` over `Where-Object | Measure-Object`. For list accumulation in loops, initialize `New-Object System.Collections.Generic.List[T]` and use `.Add()` instead of the `+=` array operator.
